@@ -1,0 +1,95 @@
+///////////////////////////////////////////////////////////////////////////////
+//
+// FILE NAME: DDR_PACKAGE.PKG
+//
+// AUTHOR: Jeff Nguyen
+//
+// DATE CREATED: 07/29/2014
+//
+// DESCRIPTION:  The module defines all data types, parameter used in DDR 
+// controller.
+//
+///////////////////////////////////////////////////////////////////////////////                       
+                  
+
+`ifndef DEFS_DONE
+   `define DEFS_DONE
+
+package ddr_pkg;
+
+   //implemenented for 2gb so row_addr is 14 bit
+   parameter BG_WIDTH = 2;
+   parameter BA_WIDTH = 2;
+   parameter RA_WIDTH = 14;
+   parameter CA_WIDTH = 10;
+   parameter TA_WIDTH = BG_WIDTH + BA_WIDTH + RA_WIDTH + CA_WIDTH;
+   parameter ADDR_WIDTH = 32;
+   parameter NUMBER_BANK= 16;
+   
+   parameter DATA_WIDTH = 8;
+   parameter FALSE    = 1'b0;
+   parameter TRUE     = 1'b1;
+   parameter HALF_PERIOD  = 1.25/2;
+   parameter QUARTER_PERIOD = 1.25/4;
+   
+   parameter READ     = 2'b01;
+   parameter WRITE    = 2'b10;
+
+   
+   //temporary define enum for commands
+   typedef enum {MRS, REF, PRE, ACT, WR, RD, NOP, DES} cmd_name;
+   //typedef for states in BURST_ACT
+   typedef enum {ACT_IDLE, ACT_WAIT_STATE, ACT_CMD, ACT_CAS,
+                 PRE_WAIT_DATA, PRE_WAIT_STATE,
+                 PRE_CMD, PRE_IDLE} act_fsm_type;
+   
+   //typedef for states in BURST_CAS
+   typedef enum {CAS_IDLE, CAS_WAIT_STATE, CAS_CMD, 
+                 CAS_WAIT_DATA, CAS_WAIT_EXTRA} cas_fsm_type;
+   //typedef for states in fsm in BURST_RW
+   typedef enum {RW_IDLE, RW_WAIT_STATE, RW_DATA} rw_fsm_type;
+   
+   
+     //define type for write data (data-out)
+   typedef logic [8*DATA_WIDTH -1:0] data_type;
+   
+   typedef struct packed { logic [BG_WIDTH -1 :0]bg_addr;
+                           logic [BA_WIDTH -1:0] ba_addr; 
+                           logic [RA_WIDTH -1:0] row_addr;
+                           logic [CA_WIDTH -1:0] col_addr;
+                         } mem_addr_type;
+   
+   //typedef for data in include address, data, read or write request
+   typedef struct packed { logic [ADDR_WIDTH - 1:0] physical_addr;
+                           data_type data_wr;
+                           logic [1:0] rw;
+                          } input_data_type;
+                           
+   
+   //typedef for act data type include ba, bg, and row address 
+   //typedef mem_addr_type act_data_type;
+                          
+   //typedef for cas data type include ba, bg, and row address 
+   typedef struct packed {mem_addr_type cas_addr;
+                          logic [1:0]   rw;
+                          }cas_data_type;
+                          
+                          
+   //typedef for rw data type include ba, bg, and row address 
+   typedef struct packed {data_type data_wr;
+                          logic [1:0] rw;
+                          }rw_data_type;
+                             
+   //define type for control command
+   typedef struct packed { cmd_name cmd;
+                           logic [1:0] rw;
+                           logic [BG_WIDTH - 1:0] bg_addr;
+                           logic [BA_WIDTH - 1:0] ba_addr;
+                           logic [RA_WIDTH - 1:0] row_addr;
+                           logic [CA_WIDTH - 1:0] col_addr;
+                           } command_type;  
+ 
+                           
+endpackage      
+import ddr_pkg::*;
+`endif              
