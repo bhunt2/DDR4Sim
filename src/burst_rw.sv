@@ -19,10 +19,12 @@
 
 //note: use clock_t as main clock
 module BURST_RW (DDR_INTERFACE intf,
-                 input logic rw_cmd,
-                 output logic rw_rdy, data_done);
+                 input int RD_DELAY, WR_DELAY,
+                 input logic rw_cmd,   //connect to cas_rdy in cas module
+                 input logic [1:0] rw, //connect to cas module
+                 output logic rw_rdy, rw_done, rw_idle);
 
-   parameter   RW_DELAY = 11;  //TEMPORARY ASSIGN DELAY UNTIL DELAY IS COMPUTER
+   int   DELAY;  
    
    rw_fsm_type rw_state, rw_next_state;
    //logic rw_cmd, 
@@ -30,6 +32,9 @@ module BURST_RW (DDR_INTERFACE intf,
    logic clear_rw_counter = 1'b0; 
    int rw_counter,rw_delay;
    int rw_cmd_trk[$];  //tracking number of cycles each rw command waiting
+   
+   
+   assign DELAY = (rw == 2'b01)? RD_DELAY: WR_DELAY;
    
    //fsm control timing between CAS and data 
    always_ff @(posedge intf.clock_t, negedge intf.reset_n)
@@ -48,7 +53,7 @@ module BURST_RW (DDR_INTERFACE intf,
       if (!intf.reset_n) begin 
          rw_next_state    <= RW_IDLE;
          clear_rw_counter <= 1'b1;
-         data_done        <= 1'b0;
+         rw_done          <= 1'b0;
          rw_rdy           <= 1'b0;
          rw_cmd_trk.delete();
          end
@@ -56,17 +61,19 @@ module BURST_RW (DDR_INTERFACE intf,
       begin
          case (rw_state)
             RW_IDLE: begin
-               data_done        <= 1'b0;
+               rw_done        <= 1'b1;
+               rw_idle        <= 1'b1;
                if (rw_cmd == 1'b1) begin
                   rw_next_state <= RW_WAIT_STATE;
                   clear_rw_counter <= 1'b1;   
                   //set the clock cycle delay
-                  rw_delay = RW_DELAY - 1;            
+                  rw_delay = DELAY - 1;            
                end
                end
                
             RW_WAIT_STATE: begin
-               data_done        <= 1'b0;
+               rw_done          <= 1'b0;
+               rw_idle          <= 1'b0;
                clear_rw_counter <= 1'b0;
                if (rw_counter == rw_delay) begin
                    rw_next_state <= RW_DATA;
@@ -79,14 +86,14 @@ module BURST_RW (DDR_INTERFACE intf,
                end
                
             RW_DATA: begin
-                data_done        <= 1'b1;   //set data done
+                rw_done          <= 1'b1;   //set data done
                 rw_rdy           <= 1'b0;
                 clear_rw_counter <= 1'b0;
                 if (new_data == 1'b1) begin  //data avail in queue
                    rw_next_state <= RW_WAIT_STATE;
                    
                    //set new delay and update next delays
-                   rw_delay = RW_DELAY - rw_cmd_trk.pop_front -1;
+                   rw_delay = DELAY - rw_cmd_trk.pop_front -1;
                    foreach (rw_cmd_trk[i]) 
                      rw_cmd_trk [i] = {(rw_cmd_trk[i] + rw_delay +1 )};
                 

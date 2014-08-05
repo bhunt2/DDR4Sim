@@ -18,13 +18,16 @@
 package ddr_pkg;
 
    //implemenented for 2gb so row_addr is 14 bit
+   parameter CHIP_ID  = 3'b101;
    parameter BG_WIDTH = 2;
    parameter BA_WIDTH = 2;
-   parameter RA_WIDTH = 14;
+   parameter RA_WIDTH = 15;
    parameter CA_WIDTH = 10;
    parameter TA_WIDTH = BG_WIDTH + BA_WIDTH + RA_WIDTH + CA_WIDTH;
-   parameter ADDR_WIDTH = 32;
-   parameter NUMBER_BANK= 16;
+   parameter ADDR_WIDTH = 32;    //physical addr
+   parameter NUMBER_BANK= 16;    //number banks in dimm
+   parameter MRS_WIDTH  = 19;
+   
    
    parameter DATA_WIDTH = 8;
    parameter FALSE    = 1'b0;
@@ -34,12 +37,37 @@ package ddr_pkg;
    
    parameter READ     = 2'b01;
    parameter WRITE    = 2'b10;
+   
+   //timing parameter
 
+   parameter nCK      = 1.25;
+   parameter tRTP     = 7.5/nCK;
+   parameter tWR      = 15/nCK;
+   parameter tRP      = 12.5/nCK;
+   parameter ACT_DELAY = 7.5/nCK;
+   parameter CAS_DELAY = 12.5/nCK;
+
+   //timming parameter for reset
+   parameter tCKE_L   = 500000/nCK;
+   parameter tXPR     = 5;
+   parameter tMRD     = 8;
+   parameter tMOD     = 24;
+   parameter tZQ      = 4096;
+   parameter tIS      = 10;
+   parameter tREF     = 7800/nCK;          //7.8us
+   parameter tRC      = 47.5/nCK;          //refresh to act
+   
    
    //temporary define enum for commands
-   typedef enum {MRS, REF, PRE, ACT, WR, RD, NOP, DES} cmd_name;
+   typedef enum {MRS, REF, PRE, ACT, CAS_R,CAS_W, NOP, DES,ZQCL} cmd_name;
+   
+   //typedef for states in DDR CONTROLLER
+   typedef enum {CTRL_IDLE, CTRL_INIT, CTRL_RW, CTRL_UPDATE, 
+                 CTRL_WAIT, CTRL_REFRESH}
+                ctrl_fsm_type;
+  
    //typedef for states in BURST_ACT
-   typedef enum {ACT_IDLE, ACT_WAIT_STATE, ACT_CMD, ACT_CAS,
+   typedef enum {ACT_IDLE, ACT_WAIT_STATE, ACT_CMD, ACT_CAS, ACT_ONE,
                  PRE_WAIT_DATA, PRE_WAIT_STATE,
                  PRE_CMD, PRE_IDLE} act_fsm_type;
    
@@ -50,17 +78,23 @@ package ddr_pkg;
    typedef enum {RW_IDLE, RW_WAIT_STATE, RW_DATA} rw_fsm_type;
    
    
-     //define type for write data (data-out)
+    //typedef for write data (data-out)     
    typedef logic [8*DATA_WIDTH -1:0] data_type;
+   //typedef  for physical address
+   typedef logic [ADDR_WIDTH -1:0] addr_type;
    
-   typedef struct packed { logic [BG_WIDTH -1 :0]bg_addr;
+   //typedef for MRS register from stimulus
+   typedef logic [MRS_WIDTH -1:0] mode_register_type;
+  
+   
+   typedef struct packed { logic [BG_WIDTH -1:0] bg_addr;
                            logic [BA_WIDTH -1:0] ba_addr; 
                            logic [RA_WIDTH -1:0] row_addr;
                            logic [CA_WIDTH -1:0] col_addr;
                          } mem_addr_type;
    
    //typedef for data in include address, data, read or write request
-   typedef struct packed { logic [ADDR_WIDTH - 1:0] physical_addr;
+   typedef struct packed { addr_type physical_addr;
                            data_type data_wr;
                            logic [1:0] rw;
                           } input_data_type;
@@ -70,7 +104,7 @@ package ddr_pkg;
    //typedef mem_addr_type act_data_type;
                           
    //typedef for cas data type include ba, bg, and row address 
-   typedef struct packed {mem_addr_type cas_addr;
+   typedef struct packed {mem_addr_type addr;
                           logic [1:0]   rw;
                           }cas_data_type;
                           
@@ -78,15 +112,13 @@ package ddr_pkg;
    //typedef for rw data type include ba, bg, and row address 
    typedef struct packed {data_type data_wr;
                           logic [1:0] rw;
+                          int burst_length;
+                          int preamble;
                           }rw_data_type;
                              
-   //define type for control command
+   //define type for control commands, and MRS registers
    typedef struct packed { cmd_name cmd;
-                           logic [1:0] rw;
-                           logic [BG_WIDTH - 1:0] bg_addr;
-                           logic [BA_WIDTH - 1:0] ba_addr;
-                           logic [RA_WIDTH - 1:0] row_addr;
-                           logic [CA_WIDTH - 1:0] col_addr;
+                           cas_data_type cmd_data;
                            } command_type;  
  
                            

@@ -19,18 +19,20 @@
 
 //note: use clock_t as main clock
 module BURST_CAS (DDR_INTERFACE intf,
-                 input logic rw_done, //determine data completed from burst rw  
-                 input logic [1:0]  rw_request,// determine r or w request from act
-                 input logic cas_cmd,   //cas_cmd from act seq
-                 output logic cas_rdy);
+                 input logic rw_done,           //determine data completed from burst rw  
+                 input logic [1:0]  rw_request, // determine r or w request from act
+                 input logic act_rdy,           //act_rdy from act seq
+                 input int CAS_DELAY,           //from data module
+                 output logic cas_rdy,cas_idle,
+                 output logic [1:0] rw);
 
-   parameter   CAS_DELAY = 10;  //TEMPORARY ASSIGN DELAY UNTIL DELAY IS COMPUTER
-                                //RRD between ACT and CAS
+  
    cas_fsm_type cas_state, cas_next_state;
    logic new_cas = 1'b0;
    logic clear_cas_counter = 1'b0;
    int  cas_delay,cas_counter, extra_count =0;
-   int cas_cmd_trk[$];  //tracking number of cycles each rw command waiting
+   logic rtw =1'b0;
+   int act_rdy_trk[$];  //tracking number of cycles each rw command waiting
    logic [1:0] cas_rw_trk[$]; //track read or write command
    logic[1:0] request, prev_rw ;
    logic ignore = 1'b0;
@@ -54,18 +56,20 @@ module BURST_CAS (DDR_INTERFACE intf,
          clear_cas_counter <= 1'b1;
          prev_rw           <= READ;  //default to read
          cas_rdy           <= 1'b0;
+         cas_idle          <= 1'b1;
          cas_delay         = 0;
          ignore            <= 1'b0;
          cas_rw_trk.delete();
-         cas_cmd_trk.delete();
+         act_rdy_trk.delete();
          end
       else
       begin
          case (cas_state)
             RW_IDLE: begin
                cas_rdy   <= 1'b0;
+               cas_idle  <= 1'b1;
                clear_cas_counter <= 1'b1;   
-               if (cas_cmd == 1'b1) begin
+               if (act_rdy == 1'b1) begin
                   cas_next_state <= CAS_WAIT_STATE;
                   
                   //cas delay from act
@@ -82,6 +86,7 @@ module BURST_CAS (DDR_INTERFACE intf,
                
             CAS_WAIT_STATE: begin
                clear_cas_counter <= 1'b0;
+               cas_idle          <= 1'b0;
 
                //satisfy the tRDD 
                if (cas_counter == cas_delay) begin
@@ -90,14 +95,22 @@ module BURST_CAS (DDR_INTERFACE intf,
                   if (prev_rw == request) begin
                      cas_next_state <= CAS_CMD; 
                      cas_rdy        <= 1'b1;
+                     rw             <= request;
                      end                                      
-                  else  // read to write OR write to read
-                     cas_next_state <= CAS_WAIT_DATA;
+                  else  begin             // read to write OR write to read
+                     extra_wait(.prev_rw(prev_rw),.request(request),
+                                .rtw(rtw),
+                                .extra_count(extra_count));
+                     if (rtw == 1'b1) 
+                        cas_next_state <= CAS_WAIT_EXTRA;           
+                     else            
+                        cas_next_state <= CAS_WAIT_DATA;
+                        end
                   end
                   
                //track when RW cmd occurs
-                if (cas_cmd == 1'b1)    
-                   cas_cmd_trk = {cas_cmd_trk, (cas_delay - cas_counter )}; 
+                if (act_rdy == 1'b1)    
+                   act_rdy_trk = {act_rdy_trk, (cas_delay - cas_counter )}; 
   
                 if ((rw_request[0] || rw_request [1]) == 1'b1)       
                    cas_rw_trk  = {cas_rw_trk, rw_request[1:0]};                  
@@ -113,14 +126,14 @@ module BURST_CAS (DDR_INTERFACE intf,
                      cas_next_state <= CAS_WAIT_STATE;
 
                      //set new delay and update next delays
-                     cas_delay = CAS_DELAY - cas_cmd_trk.pop_front -1;
+                     cas_delay = CAS_DELAY - act_rdy_trk.pop_front -1;
                      request   = cas_rw_trk.pop_front;
                      
-                     foreach (cas_cmd_trk[i]) 
-                        cas_cmd_trk [i] = {(cas_cmd_trk[i] + cas_delay +1 )};
+                     foreach (act_rdy_trk[i]) 
+                        act_rdy_trk [i] = {(act_rdy_trk[i] + cas_delay +1 )};
                      //track when RW cmd occurs
-                     if (cas_cmd == 1'b1)    
-                        cas_cmd_trk = {cas_cmd_trk, (cas_delay - cas_counter )};
+                     if (act_rdy == 1'b1)    
+                        act_rdy_trk = {act_rdy_trk, (cas_delay - cas_counter )};
                      if ((rw_request[0] ||rw_request [1]) == 1'b1)  
                         cas_rw_trk  = {cas_rw_trk, rw_request};
                      end
@@ -128,8 +141,8 @@ module BURST_CAS (DDR_INTERFACE intf,
                      cas_next_state <= CAS_IDLE;
 
                      //track when RW cmd occurs
-                     if (cas_cmd == 1'b1)    
-                        cas_cmd_trk = {cas_cmd_trk, (cas_delay - cas_counter )};
+                     if (act_rdy == 1'b1)    
+                        act_rdy_trk = {act_rdy_trk, (cas_delay - cas_counter )};
                      if ((rw_request[0] || rw_request [1]) == 1'b1)   
                         cas_rw_trk  = {cas_rw_trk, rw_request};
                      end
@@ -140,13 +153,12 @@ module BURST_CAS (DDR_INTERFACE intf,
                   
                   if (rw_done == 1'b1) begin
                      cas_next_state <= CAS_WAIT_EXTRA;
-                     clear_cas_counter <= 1'b1;
-                     extra_wait(.prev_rw(prev_rw),.request(request),
-                                .extra_count(extra_count));
+                     clear_cas_counter <= 1'b1;                     
                   end
+                  
                   //track when RW cmd occurs
-                  if (cas_cmd == 1'b1)    
-                      cas_cmd_trk = {cas_cmd_trk, (cas_delay - cas_counter )};
+                  if (act_rdy == 1'b1)    
+                      act_rdy_trk = {act_rdy_trk, (cas_delay - cas_counter )};
                   if ((rw_request[0] || rw_request [1]) == 1'b1)    
                       cas_rw_trk  = {cas_rw_trk, rw_request};
                   end
@@ -154,12 +166,15 @@ module BURST_CAS (DDR_INTERFACE intf,
                CAS_WAIT_EXTRA: begin
                    clear_cas_counter <= 1'b0;
                    
-                   if (cas_counter == extra_count) 
+                   if (cas_counter == extra_count) begin
                       cas_next_state <= CAS_CMD;
-                   
+                      cas_rdy        <= 1'b1;
+                      rw             <= request;
+                      end
+                       
                    //track when RW cmd occurs
-                   if (cas_cmd == 1'b1)    
-                      cas_cmd_trk = {cas_cmd_trk, (cas_delay - cas_counter )};
+                   if (act_rdy == 1'b1)    
+                      act_rdy_trk = {act_rdy_trk, (cas_delay - cas_counter )};
                    if ((rw_request[0] || rw_request[1]) == 1'b1)   
                       cas_rw_trk  = {cas_rw_trk, rw_request};
                    end
@@ -170,12 +185,18 @@ module BURST_CAS (DDR_INTERFACE intf,
          end  
          
    
-    //there will be implement later           
+    //there will be implement later
+    //extra count for read to write CL - CWL + BL/2 + 2nclk
+    //extra count for write to read 4nclk + tWTR           
     function void extra_wait(input logic[1:0] prev_rw, request, 
+                             output logic rtw,
                              output int extra_count);
     begin
-       if ((prev_rw == READ) && (request == WRITE)) 
+       rtw           = 1'b0;
+       if ((prev_rw == READ) && (request == WRITE)) begin
+          rtw         = 1'b1;
           extra_count = 10;    
+          end
        else 
          if ((prev_rw == WRITE) && (request == READ))  
           extra_count = 15;  
@@ -197,7 +218,7 @@ module BURST_CAS (DDR_INTERFACE intf,
       //determine the next RW command.
     always_ff @ (posedge intf.clock_t)
     begin
-       if ((cas_next_state == RW_DATA) && (cas_cmd_trk.size != 0) ) 
+       if ((cas_next_state == RW_DATA) && (act_rdy_trk.size != 0) ) 
           new_cas <= 1'b1;
        else
           new_cas <= 1'b0;
