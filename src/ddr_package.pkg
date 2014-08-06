@@ -42,6 +42,7 @@ package ddr_pkg;
 
    parameter nCK      = 1.25;
    parameter tRTP     = 7.5/nCK;
+   parameter tWTR     = 7.5/nCK;
    parameter tWR      = 15/nCK;
    parameter tRP      = 12.5/nCK;
    parameter ACT_DELAY = 7.5/nCK;
