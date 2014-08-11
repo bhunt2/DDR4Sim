@@ -45,7 +45,13 @@ module BURST_DATA (DDR_INTERFACE intf,
    command_type  cmd_out,cmd_nop;
    
    //timing paramters
-   int BL,CL, CWL, AL, RPRE, WPRE, tCCD;
+   int 	BL, 	// B Latency
+		CL, 	// CAS Latency
+		CWL, 	// CAS Write Latency
+		AL, 	// Additive Latency
+		RPRE, 	// Read Preamble Minimum Pulse Width
+		WPRE, 	// Write Preamble Minimum Pulse Width
+		tCCD;	// Column to Column Delay
    
    //each act command, the data is placed into 3 separate queues for act, cas,
    // rw data.
@@ -54,7 +60,7 @@ module BURST_DATA (DDR_INTERFACE intf,
    
    begin
       if (!intf.reset_n) begin
-         mem_addr <= '1;
+         mem_addr <= '1;		// ***** Don't mix blocking and non-blocking *****
          rw_queue.delete();
          cas_queue.delete();
          

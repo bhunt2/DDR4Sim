@@ -1,10 +1,14 @@
+`include "ddr_package.pkg"
+
+module DDR4_Checker(clock_n, clock_t, reset_n, cke, cs_n, act_n, ras_n_a16, cas_n_a15, we_n_a14, bc_n_a12, ap_a10, addr17, addr13, addr11, addr9_0, bg_addr, ba_addr);
+
 // Activate Commands
 //  Require that CS_n of a specific chip be de-asserted (active low) then ACT_n be
 //  de-asserted to begin the activate process.  This may not be needed and the only
 //  place this assertion can reasonably go is maybe in the activate method.
-property Activate
-	CS_n |-> ACT_n;
-endproperty
+//property Activate
+//	CS_n |-> ACT_n;
+//endproperty
 
 // Input data mask
 //  ** This does not need implementing **
@@ -15,9 +19,8 @@ endproperty
 // Reset
 //  The reset is active low and asynchronous.  System must return to default state
 //  a reset command is given
-property Reset
-	~RESET_n |-> ((((All signals are default))))**************
-endproperty
+assert property (@(posedge clock_t) reset_n ##tCKE_L cke);
+
 
 // Data Strobe
 //  This is the signal that transmits data.  It is an inout signal because it is an
@@ -46,26 +49,26 @@ endproperty
 //  Can be set in MR0 A11, A10, and A9.  The table for these settings are on
 //  page 14 of the JEDEC Guide.
 //  ** Is this going to be utilized? **
-property
+//property
 	
-endproperty
+//endproperty
 
 // CAS Latency Setting
 //  CAS Latency can be set for a particular DDR4 DIMM architecture in MR0 by
 //  A2, A4, A5, and A6.  The table for the settings is found on page 16 of the
 //  JEDEC guide.  This table changes dependent on the DRAM frequency being used.
 //  ** Is this going to be utilized? **
-property CASLatencySetting
+//property CASLatencySetting
 	
-endproperty
+//endproperty
 
 // CAS Write Latency Setting
 //  CAS Write Latency can be set in MR2 A3-5.  The table for the settings are
 //  found on page 16 of the JEDEC Guide.
 //  ** Is this going to be utilized? **
-property
+//property
 
-endproperty
+//endproperty
 
 // CAL CS to CMD/ADDR Latency Setting
 //  Can be set in MR4 A6-8.  The table for the settings are found on page 20
@@ -88,9 +91,9 @@ endproperty
 //  address as shown in Table 18 on page 26 of the JEDEC Guide.
 //  ** Is this going to be implemented or will it be static? **
 //    This is the only mode register bit that will change in our simulation
-property
+//property
 	
-endproperty
+//endproperty
 
 // Write Leveling
 //  The settings for Write Leveling can be found in section 4.7.
