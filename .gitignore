@@ -1,4 +1,4 @@
-/sim/work/*
-/sim/DDR4.*
-/sim/modelsim.ini
-/sim/vsim.wlf
+sim/work/
+sim/DDR4.*
+sim/modelsim.ini
+sim/vsim.wlf
