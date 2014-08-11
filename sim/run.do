@@ -13,7 +13,7 @@ vlog -work work -sv ../src/ddr_interface.sv
 vlog -work work -sv ../src/memory_check.sv
 vlog -work work -sv ../src/ddr_clock.sv
 vlog -work work -sv ../src/test.sv
-vlog -work work -sv ../src/Assersions.sv
+vlog -work work -sv ../src/Assertions.sv
 vlog -work work -sv ../src/Stimulus_save.sv
 vsim -voptargs=+acc work.top
 do wave.do
