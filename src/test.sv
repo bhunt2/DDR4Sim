@@ -16,6 +16,7 @@ logic dev_busy;
 
    //testing variables
    DDR_INTERFACE intf();
+  // bind DDR_INTERFACE DDR4_Checker C1(.intf(intf));
    CTRL_INTERFACE ctrl_intf();
    DIMM_MODEL dimm(.intf(intf),
                    .ctrl_intf(ctrl_intf));
@@ -78,7 +79,8 @@ logic dev_busy;
  
 initial
 begin
-  #1ns
+#0
+  intf.reset_n <= 'X;
   w_pre   <= 1'b1;
   r_pre   <= 1'b1;
   burst_length <= 2'b10;
@@ -86,7 +88,7 @@ begin
   cas_dly  <= 4;
   wr_dly   <= 10;
   rd_dly   <= 13;
-  intf.reset_n <= 1'b1;
+  //intf.reset_n <= 1'b1;
   //act_cmd <= 1'b0;
   mrs_update <= 1'b0;
   #200ns

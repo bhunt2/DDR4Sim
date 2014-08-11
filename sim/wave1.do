@@ -2,6 +2,7 @@ onerror {resume}
 quietly WaveActivateNextPane {} 0
 add wave -noupdate /top/intf/reset_n
 add wave -noupdate /top/intf/cke
+add wave -noupdate /top/intf/clock_t
 TreeUpdate [SetDefaultTree]
 WaveRestoreCursors {{Cursor 1} {0 ps} 0}
 quietly wave cursor active 1
@@ -19,4 +20,4 @@ configure wave -griddelta 40
 configure wave -timeline 0
 configure wave -timelineunits ms
 update
-WaveRestoreZoom {0 ps} {215031 ps}
+WaveRestoreZoom {195721 ps} {410752 ps}

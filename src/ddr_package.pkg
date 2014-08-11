@@ -50,7 +50,7 @@ package ddr_pkg;
 
    //timming parameter for reset
    //parameter tCKE_L   = 500000/nCK;
-   parameter tCKE_L   = 500/nCK;
+   parameter tCKE_L   = int'(500/nCK);
    parameter tXPR     = 5;
    parameter tMRD     = 8;
    parameter tMOD     = 24;

@@ -50,19 +50,7 @@ module BURST_DATA (DDR_INTERFACE intf,
    
    bit act_cmd_d;
    
-   begin
-      if (!intf.reset_n) begin
-         mem_addr <= '1;		// ***** Don't mix blocking and non-blocking *****
-         rw_queue.delete();
-         cas_queue.delete();
-         
-         end
-      else begin    
-        //set cmd nop
-        cmd_nop.cmd            = NOP;
-        cmd_nop.cmd_data.rw    = 2'b00;
-        cmd_nop.cmd_data.addr  = '1;
-=======
+
 //each act command, the data is placed into 3 separate queues for act, cas,
 // rw data.
 always @(intf.reset_n, ctrl_intf.act_rdy, ctrl_intf.cas_rdy,ctrl_intf.rw_rdy,

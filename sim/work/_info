@@ -9,14 +9,13 @@ z2
 cModel Technology
 Z0 dN:/My Documents/DDR4Sim/sim
 T_opt
-!s110 1407724268
-Vg9`OmJEa`YD:[>Xe9Oj9h3
+!s110 1407737860
+VYSggA`><4Wn7ITO7;]``j0
 04 3 4 work top fast 0
-=1-a4badbfab919-53e82aec-43-1bfc
+=1-a4badbfab919-53e86003-3de-1664
 Z1 o-quiet -auto_acc_if_foreign -work work +acc
 n@_opt
 Z2 OL;O;10.3b;59
-R0
 T_opt2
 !s110 1407535912
 VBh;Z<_mN[<LEUDId3lT8[0
@@ -26,11 +25,37 @@ R1
 n@_opt2
 R2
 R0
-vBURST_ACT
+XAssersions_sv_unit
 Z3 DXx6 sv_std 3 std 0 22 <EOTafDcUY:cQeO^ICn]m3
-Z4 DXx4 work 7 ddr_pkg 0 22 C]eH8<_Lg><TfE=e2U9i10
+Z4 DXx4 work 7 ddr_pkg 0 22 k::UoLicBQm@z7f6BW<9P1
+VB?RgnkJPV^dLe=?in14<k2
+r1
+!s85 0
+31
+!i10b 1
+!s100 4:7VTD]^eZh7lJWmkW_8z2
+IB?RgnkJPV^dLe=?in14<k2
+!i103 1
+S1
+R0
+Z5 w1407727636
+Z6 8../src/Assersions.sv
+Z7 F../src/Assersions.sv
+Z8 Fddr_package.pkg
+Z9 L1 132
+Z10 OL;L;10.3b;59
+Z11 !s108 1407737858.030000
+Z12 !s107 ddr_package.pkg|../src/Assersions.sv|
+Z13 !s90 -##implicit##push_minusfile_path##|N:/My Documents/DDR4Sim/sim/vlog.opt|-##implicit##pop_minusfile_path##|-reportprogress|300|-work|work|-sv|../src/Assersions.sv|
+!i113 0
+Z14 o-work work -sv -L mtiAvm -L mtiOvm -L mtiUvm -L mtiUPF -L infact
+Z15 tSvlog 1
+n@assersions_sv_unit
+vBURST_ACT
+R3
+R4
 DXx4 work 17 burst_act_sv_unit 0 22 kbjM6]@Yj?7Z`R0ak5fSU1
-Z5 V`JN@9S9cnhjKRR_L]QIcM3
+Z16 V`JN@9S9cnhjKRR_L]QIcM3
 r1
 !s85 0
 31
@@ -40,17 +65,17 @@ IS8@=7F9e0T0e[4neAFl4Y2
 !s105 burst_act_sv_unit
 S1
 R0
-Z6 w1407538092
-Z7 8../src/burst_act.sv
-Z8 F../src/burst_act.sv
-Z9 L0 21
-Z10 OL;L;10.3b;59
-Z11 !s108 1407724379.895000
-Z12 !s107 ddr_package.pkg|../src/burst_act.sv|
-Z13 !s90 -##implicit##push_minusfile_path##|N:/My Documents/DDR4Sim/sim/vlog.opt|-##implicit##pop_minusfile_path##|-reportprogress|300|-work|work|-sv|../src/burst_act.sv|
+Z17 w1407538092
+Z18 8../src/burst_act.sv
+Z19 F../src/burst_act.sv
+Z20 L0 21
+R10
+Z21 !s108 1407737855.990000
+Z22 !s107 ddr_package.pkg|../src/burst_act.sv|
+Z23 !s90 -##implicit##push_minusfile_path##|N:/My Documents/DDR4Sim/sim/vlog.opt|-##implicit##pop_minusfile_path##|-reportprogress|300|-work|work|-sv|../src/burst_act.sv|
 !i113 0
-Z14 o-work work -sv -L mtiAvm -L mtiOvm -L mtiUvm -L mtiUPF -L infact
-Z15 tSvlog 1
+R14
+R15
 n@b@u@r@s@t_@a@c@t
 Xburst_act_sv_unit
 R3
@@ -65,15 +90,15 @@ IkbjM6]@Yj?7Z`R0ak5fSU1
 !i103 1
 S1
 R0
-R6
-R7
+R17
+R18
+R19
 R8
-Z16 Fddr_package.pkg
-Z17 L1 132
+R9
 R10
-R11
-R12
-R13
+R21
+R22
+R23
 !i113 0
 R14
 R15
@@ -81,7 +106,7 @@ vBURST_CAS
 R3
 R4
 DXx4 work 17 burst_cas_sv_unit 0 22 0GB9C^_lhko81ES`UZYFh0
-R5
+R16
 r1
 !s85 0
 31
@@ -91,14 +116,14 @@ IFNO;66^QkTUQBZFFzn3`[2
 !s105 burst_cas_sv_unit
 S1
 R0
-Z18 w1407531611
-Z19 8../src/burst_cas.sv
-Z20 F../src/burst_cas.sv
-R9
+Z24 w1407531611
+Z25 8../src/burst_cas.sv
+Z26 F../src/burst_cas.sv
+R20
 R10
-Z21 !s108 1407724378.495000
-Z22 !s107 ddr_package.pkg|../src/burst_cas.sv|
-Z23 !s90 -##implicit##push_minusfile_path##|N:/My Documents/DDR4Sim/sim/vlog.opt|-##implicit##pop_minusfile_path##|-reportprogress|300|-work|work|-sv|../src/burst_cas.sv|
+Z27 !s108 1407737855.250000
+Z28 !s107 ddr_package.pkg|../src/burst_cas.sv|
+Z29 !s90 -##implicit##push_minusfile_path##|N:/My Documents/DDR4Sim/sim/vlog.opt|-##implicit##pop_minusfile_path##|-reportprogress|300|-work|work|-sv|../src/burst_cas.sv|
 !i113 0
 R14
 R15
@@ -116,15 +141,15 @@ I0GB9C^_lhko81ES`UZYFh0
 !i103 1
 S1
 R0
-R18
-R19
-R20
-R16
-R17
+R24
+R25
+R26
+R8
+R9
 R10
-R21
-R22
-R23
+R27
+R28
+R29
 !i113 0
 R14
 R15
@@ -132,7 +157,7 @@ vBURST_CONF
 R3
 R4
 DXx4 work 18 burst_conf_sv_unit 0 22 88Z`?;gO=P]BLmDYlUn>13
-R5
+R16
 r1
 !s85 0
 31
@@ -142,14 +167,14 @@ IN3e?64P63JXHP?=kR:3kc0
 !s105 burst_conf_sv_unit
 S1
 R0
-Z24 w1407464336
-Z25 8../src/burst_conf.sv
-Z26 F../src/burst_conf.sv
-Z27 L0 16
+Z30 w1407724422
+Z31 8../src/burst_conf.sv
+Z32 F../src/burst_conf.sv
+Z33 L0 16
 R10
-Z28 !s108 1407724379.725000
-Z29 !s107 ddr_package.pkg|../src/burst_conf.sv|
-Z30 !s90 -##implicit##push_minusfile_path##|N:/My Documents/DDR4Sim/sim/vlog.opt|-##implicit##pop_minusfile_path##|-reportprogress|300|-work|work|-sv|../src/burst_conf.sv|
+Z34 !s108 1407737855.820000
+Z35 !s107 ddr_package.pkg|../src/burst_conf.sv|
+Z36 !s90 -##implicit##push_minusfile_path##|N:/My Documents/DDR4Sim/sim/vlog.opt|-##implicit##pop_minusfile_path##|-reportprogress|300|-work|work|-sv|../src/burst_conf.sv|
 !i113 0
 R14
 R15
@@ -167,15 +192,15 @@ I88Z`?;gO=P]BLmDYlUn>13
 !i103 1
 S1
 R0
-R24
-R25
-R26
-R16
-R17
-R10
-R28
-R29
 R30
+R31
+R32
+R8
+R9
+R10
+R34
+R35
+R36
 !i113 0
 R14
 R15
@@ -183,24 +208,24 @@ vBURST_DATA
 R3
 R4
 DXx4 work 18 burst_data_sv_unit 0 22 <TVm[_C>S@9MjhX>2TOO?0
-R5
+R16
 r1
 !s85 0
 31
 !i10b 1
-!s100 JODkZEN3R[hIKgEPK@kae2
-I`Rb:D_RSJ`_HnjFPm[acm0
+!s100 gdDQX9;;EEHh[Z=lahhUz0
+IIK1RO2jKP6KcW_iAfaDFc3
 !s105 burst_data_sv_unit
 S1
 R0
-Z31 w1407649043
-Z32 8../src/burst_data.sv
-Z33 F../src/burst_data.sv
-Z34 L0 19
+Z37 w1407725435
+Z38 8../src/burst_data.sv
+Z39 F../src/burst_data.sv
+Z40 L0 19
 R10
-Z35 !s108 1407724379.525000
-Z36 !s107 ddr_package.pkg|../src/burst_data.sv|
-Z37 !s90 -##implicit##push_minusfile_path##|N:/My Documents/DDR4Sim/sim/vlog.opt|-##implicit##pop_minusfile_path##|-reportprogress|300|-work|work|-sv|../src/burst_data.sv|
+Z41 !s108 1407737855.640000
+Z42 !s107 ddr_package.pkg|../src/burst_data.sv|
+Z43 !s90 -##implicit##push_minusfile_path##|N:/My Documents/DDR4Sim/sim/vlog.opt|-##implicit##pop_minusfile_path##|-reportprogress|300|-work|work|-sv|../src/burst_data.sv|
 !i113 0
 R14
 R15
@@ -218,15 +243,15 @@ I<TVm[_C>S@9MjhX>2TOO?0
 !i103 1
 S1
 R0
-R31
-R32
-R33
-R16
-R17
-R10
-R35
-R36
 R37
+R38
+R39
+R8
+R9
+R10
+R41
+R42
+R43
 !i113 0
 R14
 R15
@@ -234,7 +259,7 @@ vBURST_RW
 R3
 R4
 DXx4 work 16 burst_rw_sv_unit 0 22 =H;<7ahWDCNK_gWO81PcT0
-R5
+R16
 r1
 !s85 0
 31
@@ -244,14 +269,14 @@ ITjMl=ddCfKkU:DIhI_K^63
 !s105 burst_rw_sv_unit
 S1
 R0
-Z38 w1407514540
-Z39 8../src/burst_rw.sv
-Z40 F../src/burst_rw.sv
-R9
+Z44 w1407514540
+Z45 8../src/burst_rw.sv
+Z46 F../src/burst_rw.sv
+R20
 R10
-Z41 !s108 1407724378.945000
-Z42 !s107 ddr_package.pkg|../src/burst_rw.sv|
-Z43 !s90 -##implicit##push_minusfile_path##|N:/My Documents/DDR4Sim/sim/vlog.opt|-##implicit##pop_minusfile_path##|-reportprogress|300|-work|work|-sv|../src/burst_rw.sv|
+Z47 !s108 1407737855.450000
+Z48 !s107 ddr_package.pkg|../src/burst_rw.sv|
+Z49 !s90 -##implicit##push_minusfile_path##|N:/My Documents/DDR4Sim/sim/vlog.opt|-##implicit##pop_minusfile_path##|-reportprogress|300|-work|work|-sv|../src/burst_rw.sv|
 !i113 0
 R14
 R15
@@ -269,15 +294,15 @@ I=H;<7ahWDCNK_gWO81PcT0
 !i103 1
 S1
 R0
-R38
-R39
-R40
-R16
-R17
+R44
+R45
+R46
+R8
+R9
 R10
-R41
-R42
-R43
+R47
+R48
+R49
 !i113 0
 R14
 R15
@@ -285,7 +310,7 @@ YCTRL_INTERFACE
 R3
 R4
 DXx4 work 22 ctrl_interface_sv_unit 0 22 [;b9[R^S:?:1<7O?J7`jj0
-R5
+R16
 r1
 !s85 0
 31
@@ -295,14 +320,14 @@ IPNbd=CFYH``XMCBZI`ENL1
 !s105 ctrl_interface_sv_unit
 S1
 R0
-Z44 w1407533703
-Z45 8../src/ctrl_interface.sv
-Z46 F../src/ctrl_interface.sv
-R27
+Z50 w1407533703
+Z51 8../src/ctrl_interface.sv
+Z52 F../src/ctrl_interface.sv
+R33
 R10
-Z47 !s108 1407724380.275000
-Z48 !s107 ddr_package.pkg|../src/ctrl_interface.sv|
-Z49 !s90 -##implicit##push_minusfile_path##|N:/My Documents/DDR4Sim/sim/vlog.opt|-##implicit##pop_minusfile_path##|-reportprogress|300|-work|work|-sv|../src/ctrl_interface.sv|
+Z53 !s108 1407737856.720000
+Z54 !s107 ddr_package.pkg|../src/ctrl_interface.sv|
+Z55 !s90 -##implicit##push_minusfile_path##|N:/My Documents/DDR4Sim/sim/vlog.opt|-##implicit##pop_minusfile_path##|-reportprogress|300|-work|work|-sv|../src/ctrl_interface.sv|
 !i113 0
 R14
 R15
@@ -320,23 +345,49 @@ I[;b9[R^S:?:1<7O?J7`jj0
 !i103 1
 S1
 R0
-R44
-R45
-R46
-R16
-R17
+R50
+R51
+R52
+R8
+R9
 R10
-R47
-R48
-R49
+R53
+R54
+R55
 !i113 0
 R14
 R15
+vDDR4_Checker
+R3
+R4
+DXx4 work 18 Assersions_sv_unit 0 22 B?RgnkJPV^dLe=?in14<k2
+R16
+r1
+!s85 0
+31
+!i10b 1
+!s100 4DOg<?:M_l]_Il8[?mnfY1
+Io2lhZgGP;4[0bGYW=<Y5d2
+!s105 Assersions_sv_unit
+S1
+R0
+R5
+R6
+R7
+L0 3
+R10
+R11
+R12
+R13
+!i113 0
+R14
+R15
+n@d@d@r4_@checker
 vDDR_CLOCK
 R3
 R4
 DXx4 work 17 ddr_clock_sv_unit 0 22 RSSJFWAKGVlZ6nEA[kX1Y2
-R5
+R16
 r1
 !s85 0
 31
@@ -346,14 +397,14 @@ I8Mje77KFYeCn0c>ol9XEI2
 !s105 ddr_clock_sv_unit
 S1
 R0
-Z50 w1407723422
-Z51 8../src/ddr_clock.sv
-Z52 F../src/ddr_clock.sv
-Z53 L0 17
+Z56 w1407723422
+Z57 8../src/ddr_clock.sv
+Z58 F../src/ddr_clock.sv
+Z59 L0 17
 R10
-Z54 !s108 1407724381.765000
-Z55 !s107 ddr_package.pkg|../src/ddr_clock.sv|
-Z56 !s90 -##implicit##push_minusfile_path##|N:/My Documents/DDR4Sim/sim/vlog.opt|-##implicit##pop_minusfile_path##|-reportprogress|300|-work|work|-sv|../src/ddr_clock.sv|
+Z60 !s108 1407737857.650000
+Z61 !s107 ddr_package.pkg|../src/ddr_clock.sv|
+Z62 !s90 -##implicit##push_minusfile_path##|N:/My Documents/DDR4Sim/sim/vlog.opt|-##implicit##pop_minusfile_path##|-reportprogress|300|-work|work|-sv|../src/ddr_clock.sv|
 !i113 0
 R14
 R15
@@ -371,15 +422,15 @@ IRSSJFWAKGVlZ6nEA[kX1Y2
 !i103 1
 S1
 R0
-R50
-R51
-R52
-R16
-R17
-R10
-R54
-R55
 R56
+R57
+R58
+R8
+R9
+R10
+R60
+R61
+R62
 !i113 0
 R14
 R15
@@ -387,20 +438,20 @@ vddr_controller
 R3
 DXx4 work 7 ddr_pkg 0 22 5hGM3nAT;hIMMJWYg>zZi2
 DXx4 work 22 ddr_controller_sv_unit 0 22 nG8<=d70h]BcB3ObG=BF83
-R5
+R16
 r1
 !s85 0
 31
 !i10b 1
 !s100 DJfcC_0@?nSY@o4]?C4T?1
 I]K3^oh`<KMgJ^P9eA]YIo1
-Z57 !s105 ddr_controller_sv_unit
+Z63 !s105 ddr_controller_sv_unit
 S1
 R0
 w1407342026
 8N:/My Documents/DDR4Sim/src/ddr_controller.sv
 FN:/My Documents/DDR4Sim/src/ddr_controller.sv
-R27
+R33
 R10
 !s108 1407342044.313000
 !s107 ddr_package.pkg|N:/My Documents/DDR4Sim/src/ddr_controller.sv|
@@ -411,24 +462,24 @@ vDDR_CONTROLLER
 R3
 R4
 DXx4 work 22 ddr_controller_sv_unit 0 22 @fjzA^hGMMN5^0W@1nThQ1
-R5
+R16
 r1
 !s85 0
 31
 !i10b 1
 !s100 [ESJz:fBH4:WM2SQgdm;`1
 IgoPz>]FHCQF@N8FdFh:nD3
-R57
+R63
 S1
 R0
-Z58 w1407606411
-Z59 8../src/ddr_controller.sv
-Z60 F../src/ddr_controller.sv
-R27
+Z64 w1407606411
+Z65 8../src/ddr_controller.sv
+Z66 F../src/ddr_controller.sv
+R33
 R10
-Z61 !s108 1407724380.095000
-Z62 !s107 ddr_package.pkg|../src/ddr_controller.sv|
-Z63 !s90 -##implicit##push_minusfile_path##|N:/My Documents/DDR4Sim/sim/vlog.opt|-##implicit##pop_minusfile_path##|-reportprogress|300|-work|work|-sv|../src/ddr_controller.sv|
+Z67 !s108 1407737856.520000
+Z68 !s107 ddr_package.pkg|../src/ddr_controller.sv|
+Z69 !s90 -##implicit##push_minusfile_path##|N:/My Documents/DDR4Sim/sim/vlog.opt|-##implicit##pop_minusfile_path##|-reportprogress|300|-work|work|-sv|../src/ddr_controller.sv|
 !i113 0
 R14
 R15
@@ -446,40 +497,40 @@ I@fjzA^hGMMN5^0W@1nThQ1
 !i103 1
 S1
 R0
-R58
-R59
-R60
-R16
-R17
+R64
+R65
+R66
+R8
+R9
 R10
-R61
-R62
-R63
+R67
+R68
+R69
 !i113 0
 R14
 R15
 YDDR_INTERFACE
 R3
 R4
-DXx4 work 21 ddr_interface_sv_unit 0 22 2mIM38?nPB8W9QX2iO5CM0
-R5
+DXx4 work 21 ddr_interface_sv_unit 0 22 ;ceGh]_HjWKC]GI4Ja@BW2
+R16
 r1
 !s85 0
 31
 !i10b 1
-!s100 6_kKj]D[:A3mgVH1VDoGO3
-IZZ5dH:0a@7aHQY79PZHF:3
+!s100 LG32_o^5<OOIS<2IJ7aWG1
+IP7=z]zR[N?f^VZ2bX:Qg?0
 !s105 ddr_interface_sv_unit
 S1
 R0
-Z64 w1407722981
-Z65 8../src/ddr_interface.sv
-Z66 F../src/ddr_interface.sv
-R34
+Z70 w1407737841
+Z71 8../src/ddr_interface.sv
+Z72 F../src/ddr_interface.sv
+R40
 R10
-Z67 !s108 1407724381.365000
-Z68 !s107 ddr_package.pkg|../src/ddr_interface.sv|
-Z69 !s90 -##implicit##push_minusfile_path##|N:/My Documents/DDR4Sim/sim/vlog.opt|-##implicit##pop_minusfile_path##|-reportprogress|300|-work|work|-sv|../src/ddr_interface.sv|
+Z73 !s108 1407737857.280000
+Z74 !s107 ddr_package.pkg|../src/ddr_interface.sv|
+Z75 !s90 -##implicit##push_minusfile_path##|N:/My Documents/DDR4Sim/sim/vlog.opt|-##implicit##pop_minusfile_path##|-reportprogress|300|-work|work|-sv|../src/ddr_interface.sv|
 !i113 0
 R14
 R15
@@ -487,25 +538,25 @@ n@d@d@r_@i@n@t@e@r@f@a@c@e
 Xddr_interface_sv_unit
 R3
 R4
-V2mIM38?nPB8W9QX2iO5CM0
+V;ceGh]_HjWKC]GI4Ja@BW2
 r1
 !s85 0
 31
 !i10b 1
-!s100 XKbWh84>@2n@DFa55lOmR2
-I2mIM38?nPB8W9QX2iO5CM0
+!s100 9FZ4D>@^fCnJgi42DA5Ad2
+I;ceGh]_HjWKC]GI4Ja@BW2
 !i103 1
 S1
 R0
-R64
-R65
-R66
-R16
-R17
+R70
+R71
+R72
+R8
+R9
 R10
-R67
-R68
-R69
+R73
+R74
+R75
 !i113 0
 R14
 R15
@@ -535,25 +586,25 @@ r1
 R14
 Xddr_pkg
 R3
-!s110 1407724382
+!s110 1407737858
 !i10b 1
-!s100 jNX0`jA^fk]::D==7]4IJ0
-IC]eH8<_Lg><TfE=e2U9i10
-VC]eH8<_Lg><TfE=e2U9i10
+!s100 >=3flnf>ZmJNX1eAlaNbR2
+Ik::UoLicBQm@z7f6BW<9P1
+Vk::UoLicBQm@z7f6BW<9P1
 S1
 R0
-w1407724359
-R16
-Z70 8../src/Stimulus.sv
-Z71 F../src/Stimulus.sv
+Z76 w1407723656
+R8
+Z77 8../src/Stimulus_save.sv
+Z78 F../src/Stimulus_save.sv
 L0 18
 R10
 r1
 !s85 0
 31
-!s108 1407724382.115000
-!s107 ddr_package.pkg|../src/Stimulus.sv|
-Z72 !s90 -##implicit##push_minusfile_path##|N:/My Documents/DDR4Sim/sim/vlog.opt|-##implicit##pop_minusfile_path##|-reportprogress|300|-work|work|-sv|../src/Stimulus.sv|
+Z79 !s108 1407737858.220000
+Z80 !s107 ddr_package.pkg|../src/Stimulus_save.sv|
+Z81 !s90 -##implicit##push_minusfile_path##|N:/My Documents/DDR4Sim/sim/vlog.opt|-##implicit##pop_minusfile_path##|-reportprogress|300|-work|work|-sv|../src/Stimulus_save.sv|
 !i113 0
 R14
 R15
@@ -561,7 +612,7 @@ vDDR_TOP
 R3
 R4
 DXx4 work 15 ddr_top_sv_unit 0 22 JT7YR:MS`3YQ=L^J`RDWl1
-R5
+R16
 r1
 !s85 0
 31
@@ -571,14 +622,14 @@ IT2oSQl7z_zNj:Kml<cl;J2
 !s105 ddr_top_sv_unit
 S1
 R0
-Z73 w1407368676
-Z74 8../src/ddr_top.sv
-Z75 F../src/ddr_top.sv
+Z82 w1407368676
+Z83 8../src/ddr_top.sv
+Z84 F../src/ddr_top.sv
 L0 15
 R10
-Z76 !s108 1407724381.175000
-Z77 !s107 ddr_package.pkg|../src/ddr_top.sv|
-Z78 !s90 -##implicit##push_minusfile_path##|N:/My Documents/DDR4Sim/sim/vlog.opt|-##implicit##pop_minusfile_path##|-reportprogress|300|-work|work|-sv|../src/ddr_top.sv|
+Z85 !s108 1407737857.090000
+Z86 !s107 ddr_package.pkg|../src/ddr_top.sv|
+Z87 !s90 -##implicit##push_minusfile_path##|N:/My Documents/DDR4Sim/sim/vlog.opt|-##implicit##pop_minusfile_path##|-reportprogress|300|-work|work|-sv|../src/ddr_top.sv|
 !i113 0
 R14
 R15
@@ -596,15 +647,15 @@ IJT7YR:MS`3YQ=L^J`RDWl1
 !i103 1
 S1
 R0
-R73
-R74
-R75
-R16
-R17
+R82
+R83
+R84
+R8
+R9
 R10
-R76
-R77
-R78
+R85
+R86
+R87
 !i113 0
 R14
 R15
@@ -612,7 +663,7 @@ vDIMM_MODEL
 R3
 R4
 DXx4 work 18 dimm_model_sv_unit 0 22 _N^F7lQnUPV>YR<mBS2Jk0
-R5
+R16
 r1
 !s85 0
 31
@@ -622,14 +673,14 @@ I]bmY;M_i^[HngUH=kBgFe3
 !s105 dimm_model_sv_unit
 S1
 R0
-Z79 w1407720866
-Z80 8../src/dimm_model.sv
-Z81 F../src/dimm_model.sv
-R27
+Z88 w1407720866
+Z89 8../src/dimm_model.sv
+Z90 F../src/dimm_model.sv
+R33
 R10
-Z82 !s108 1407724380.975000
-Z83 !s107 ddr_package.pkg|../src/dimm_model.sv|
-Z84 !s90 -##implicit##push_minusfile_path##|N:/My Documents/DDR4Sim/sim/vlog.opt|-##implicit##pop_minusfile_path##|-reportprogress|300|-work|work|-sv|../src/dimm_model.sv|
+Z91 !s108 1407737856.890000
+Z92 !s107 ddr_package.pkg|../src/dimm_model.sv|
+Z93 !s90 -##implicit##push_minusfile_path##|N:/My Documents/DDR4Sim/sim/vlog.opt|-##implicit##pop_minusfile_path##|-reportprogress|300|-work|work|-sv|../src/dimm_model.sv|
 !i113 0
 R14
 R15
@@ -647,15 +698,15 @@ I_N^F7lQnUPV>YR<mBS2Jk0
 !i103 1
 S1
 R0
-R79
-R80
-R81
-R16
-R17
+R88
+R89
+R90
+R8
+R9
 R10
-R82
-R83
-R84
+R91
+R92
+R93
 !i113 0
 R14
 R15
@@ -663,20 +714,20 @@ vmemory_check
 R3
 DXx4 work 7 ddr_pkg 0 22 NFP`Y@0nN2zZ0XP@A<G552
 DXx4 work 20 memory_check_sv_unit 0 22 ?VP:Wgg4D0k`TSSnzdIag2
-R5
+R16
 r1
 !s85 0
 31
 !i10b 1
 !s100 daZ;X046D80`IoS=6`RI]0
 IhiTQj[6QZ??>=LO71DL;00
-Z85 !s105 memory_check_sv_unit
+Z94 !s105 memory_check_sv_unit
 S1
 R0
 w1407620608
 8N:/My Documents/DDR4Sim/src/memory_check.sv
 FN:/My Documents/DDR4Sim/src/memory_check.sv
-R53
+R59
 R10
 !s108 1407620620.734000
 !s107 ddr_package.pkg|N:/My Documents/DDR4Sim/src/memory_check.sv|
@@ -687,24 +738,24 @@ vMEMORY_CHECK
 R3
 R4
 DXx4 work 20 memory_check_sv_unit 0 22 1HKCo<4G3Y8OMO0R4PKY]1
-R5
+R16
 r1
 !s85 0
 31
 !i10b 1
 !s100 __Obc8h3BEO`j`DhWTc3k1
 I4aHo>NkS@RGZJgNI]Fc8C1
-R85
+R94
 S1
 R0
-Z86 w1407652054
-Z87 8../src/memory_check.sv
-Z88 F../src/memory_check.sv
-R53
+Z95 w1407652054
+Z96 8../src/memory_check.sv
+Z97 F../src/memory_check.sv
+R59
 R10
-Z89 !s108 1407724381.605000
-Z90 !s107 ddr_package.pkg|../src/memory_check.sv|
-Z91 !s90 -##implicit##push_minusfile_path##|N:/My Documents/DDR4Sim/sim/vlog.opt|-##implicit##pop_minusfile_path##|-reportprogress|300|-work|work|-sv|../src/memory_check.sv|
+Z98 !s108 1407737857.460000
+Z99 !s107 ddr_package.pkg|../src/memory_check.sv|
+Z100 !s90 -##implicit##push_minusfile_path##|N:/My Documents/DDR4Sim/sim/vlog.opt|-##implicit##pop_minusfile_path##|-reportprogress|300|-work|work|-sv|../src/memory_check.sv|
 !i113 0
 R14
 R15
@@ -722,47 +773,73 @@ I1HKCo<4G3Y8OMO0R4PKY]1
 !i103 1
 S1
 R0
-R86
-R87
-R88
-R16
-R17
+R95
+R96
+R97
+R8
+R9
 R10
-R89
-R90
-R91
+R98
+R99
+R100
 !i113 0
 R14
 R15
 vStimulus
 R3
 R4
-DXx4 work 16 Stimulus_sv_unit 0 22 K]3aFjC6L6ie5=]@i0<dn1
-R5
+DXx4 work 21 Stimulus_save_sv_unit 0 22 ^RGXAMoc2bQ8il6R;H4aX0
+R16
 r1
 !s85 0
 31
 !i10b 1
-!s100 NQ=`VzRDh]3d@`zMh_z1Q3
-I4BfBk=<8VZ2_ZfXHGkfI00
-!s105 Stimulus_sv_unit
+!s100 4n9mD_;o>m4N6?TPD;LYQ3
+IT`OSCZRfc75jVc^=oJzRH0
+!s105 Stimulus_save_sv_unit
 S1
 R0
-Z92 w1407724256
-R70
-R71
-L0 7
+R76
+R77
+R78
+L0 8
 R10
-Z93 !s108 1407724266.707000
-!s107 ddr_package.pkg|../src/Stimulus.sv|
-R72
+R79
+R80
+R81
 !i113 0
 R14
 R15
 n@stimulus
-XStimulus_sv_unit
+XStimulus_save_sv_unit
 R3
 R4
+V^RGXAMoc2bQ8il6R;H4aX0
+r1
+!s85 0
+31
+!i10b 1
+!s100 <liVZmcIC>Y85FBG5GlXm0
+I^RGXAMoc2bQ8il6R;H4aX0
+!i103 1
+S1
+R0
+R76
+R77
+R78
+R8
+R9
+R10
+R79
+R80
+R81
+!i113 0
+R14
+R15
+n@stimulus_save_sv_unit
+XStimulus_sv_unit
+R3
+DXx4 work 7 ddr_pkg 0 22 C]eH8<_Lg><TfE=e2U9i10
 VK]3aFjC6L6ie5=]@i0<dn1
 r1
 !s85 0
@@ -773,15 +850,15 @@ IK]3aFjC6L6ie5=]@i0<dn1
 !i103 1
 S1
 R0
-R92
-R70
-R71
-R16
-R17
+w1407724256
+8../src/Stimulus.sv
+F../src/Stimulus.sv
+R8
+R9
 R10
-R93
+!s108 1407724266.707000
 !s107 ddr_package.pkg|../src/Stimulus.sv|
-R72
+!s90 -##implicit##push_minusfile_path##|N:/My Documents/DDR4Sim/sim/vlog.opt|-##implicit##pop_minusfile_path##|-reportprogress|300|-work|work|-sv|../src/Stimulus.sv|
 !i113 0
 R14
 R15
@@ -799,15 +876,15 @@ IJ6iI0Mdk;BJaA0co4H;J>0
 !i103 1
 S1
 R0
-Z94 w1407723254
-Z95 8../src/test.sv
-Z96 F../src/test.sv
-R16
-R17
+Z101 w1407729005
+Z102 8../src/test.sv
+Z103 F../src/test.sv
+R8
+R9
 R10
-Z97 !s108 1407724381.965000
-Z98 !s107 ddr_package.pkg|../src/test.sv|
-Z99 !s90 -##implicit##push_minusfile_path##|N:/My Documents/DDR4Sim/sim/vlog.opt|-##implicit##pop_minusfile_path##|-reportprogress|300|-work|work|-sv|../src/test.sv|
+Z104 !s108 1407737857.870000
+Z105 !s107 ddr_package.pkg|../src/test.sv|
+Z106 !s90 -##implicit##push_minusfile_path##|N:/My Documents/DDR4Sim/sim/vlog.opt|-##implicit##pop_minusfile_path##|-reportprogress|300|-work|work|-sv|../src/test.sv|
 !i113 0
 R14
 R15
@@ -815,24 +892,24 @@ vtop
 R3
 R4
 DXx4 work 12 test_sv_unit 0 22 J6iI0Mdk;BJaA0co4H;J>0
-R5
+R16
 r1
 !s85 0
 31
 !i10b 1
-!s100 JjYnOYPgUHa:^HUSBSI0^1
-I8=0AbBjGPDG2E1e@JN79]1
+!s100 n@W>4TTzI^eHL=>03[>Q?0
+IkM[8hYh7B5FV5^cJLABHl2
 !s105 test_sv_unit
 S1
 R0
-R94
-R95
-R96
+R101
+R102
+R103
 L0 4
 R10
-R97
-R98
-R99
+R104
+R105
+R106
 !i113 0
 R14
 R15
