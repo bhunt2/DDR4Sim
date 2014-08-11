@@ -12,7 +12,9 @@
 // 
 ///////////////////////////////////////////////////////////////////////////////     
 
-package CheckerLibrary;
+`include "ddr_package.pkg"
+
+module checker(DDR_INTERFACE intf);
 // Activate Commands
 //  Require that CS_n of a specific chip be de-asserted (active low) then ACT_n be
 //  de-asserted to begin the activate process.  This may not be needed and the only
@@ -30,17 +32,16 @@ package CheckerLibrary;
 // Reset
 //  The reset is active low and asynchronous.  System must return to default state
 //  a reset command is given
-checker check_reset(event clock, logic reset_n, cke);
-	sequence reset_s;
-         $rose(reset_n);
-	endsequence
-	sequence cke_s;
-         ##[tCKE_L:$] $rose(cke);
-	endsequence
-	property reset_p;
-         @(clock) reset_s |-> cke_s;
-	endproperty
-endchecker
+sequence reset_s;
+    $rose(intf.reset_n);
+endsequence
+sequence cke_s;
+    ##[tCKE_L:$] $rose(intf.cke);
+endsequence
+property reset_p;
+    @(posedge intf.clock_t) reset_s |-> cke_s;
+endproperty
+reset_a: assert property (reset_p);
 
 // Data Strobe
 //  This is the signal that transmits data.  It is an inout signal because it is an

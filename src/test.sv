@@ -16,8 +16,8 @@ logic dev_busy;
 
    //testing variables
    DDR_INTERFACE intf();
-  // bind DDR_INTERFACE DDR4_Checker C1(.intf(intf));
    CTRL_INTERFACE ctrl_intf();
+   CHECKER C1(.intf(intf),.ctrl_intf(ctrl_intf));
    DIMM_MODEL dimm(.intf(intf),
                    .ctrl_intf(ctrl_intf));
    DDR_CLOCK ddr_clock (.intf(intf));                
