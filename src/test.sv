@@ -8,73 +8,61 @@ timeprecision 1ps;
 
 input_data_type data_in;
 logic act_cmd;
+int BL, RD_PRE;
 logic mrs_update, w_pre, r_pre;
 logic [1:0] burst_length,al_dly;
 int cas_dly, wr_dly, rd_dly;
-logic dev_busy;
+logic [1:0] dev_rw;
+logic dev_busy, next_cmd, dev_rd;
 
 
    //testing variables
-   DDR_INTERFACE intf();
-  // bind DDR_INTERFACE DDR4_Checker C1(.intf(intf));
-   CTRL_INTERFACE ctrl_intf();
-   DIMM_MODEL dimm(.intf(intf),
-                   .ctrl_intf(ctrl_intf));
-   DDR_CLOCK ddr_clock (.intf(intf));                
-                   
-   DDR_CONTROLLER ddr_ctrl (.intf(intf),
-                            .ctrl_intf(ctrl_intf),
-                            .mrs_update(mrs_update),
-                            .mrs_bl(burst_length),
-                            .dev_busy(dev_busy));
-    BURST_ACT burst_act(.intf( intf),
-                  .ctrl_intf( ctrl_intf),
-                  .act_cmd (act_cmd));
-                  
-    BURST_DATA burst_data (.intf( intf),
-                           .ctrl_intf(ctrl_intf),
-                           .data_in(data_in),//connect to sim model
-                           .act_cmd (act_cmd));     
-  
-   BURST_RW burst_rw(.intf(intf),
-                    .ctrl_intf(ctrl_intf));
+  DDR_INTERFACE intf();
+  DDR_CLOCK ddr_clock (.intf(intf));   
+  TB_INTERFACE tb_intf();             
+    
+  Rand_Stimulus  stim(.intf(intf),
+                      .tb_intf(tb_intf)); 
+ //                 .next_cmd(next_cmd),
+ //                 .dev_busy(dev_busy),
+ //                 .data(data_in),
+ //                 .act_cmd(act_cmd));
+                 
+  MEMORY_CHECK mem_chk(.intf(intf),
+                       .tb_intf(tb_intf)); 
 
-  BURST_CAS burst_cas(.intf(intf),
-                    .ctrl_intf(ctrl_intf));                    
-   BURST_CONF burst_conf (.intf(intf),
-                          .ctrl_intf(ctrl_intf),                   
+//                       .BL(BL),
+//                       .dev_rw(dev_rw),
+//                       .data(data_in),
+//                       .act_cmd(act_cmd));
+
+  DIMM_MODEL dimm(.intf(intf),
+                  .tb_intf(tb_intf)); 
+
+//                   .BL(BL),
+//                   .RD_PRE(RD_PRE),
+//                   .dev_rd(dev_rd),
+//                   .dev_rw(dev_rw));
+
+  DDR_TOP ddr_top (.intf(intf),
+                   .tb_intf(tb_intf)); 
+//                    .data_in(data_in),
+//                    .act_cmd(act_cmd),
+                    .mrs_update(mrs_update),
                     .w_pre(w_pre),
                     .r_pre(r_pre),
                     .burst_length (burst_length),
                     .al_dly(al_dly),
                     .cas_dly(cas_dly),
                     .wr_dly(wr_dly),
-                    .rd_dly(rd_dly));
-    
-  Rand_Stimulus  stim(.intf(intf),
-                  .ctrl_intf(ctrl_intf),
-                  .dev_busy(dev_busy),
-                  .data(data_in),
-                  .act_cmd(act_cmd));
-                 
-  MEMORY_CHECK mem_chk(.intf(intf),
-                       .ctrl_intf(ctrl_intf),
-                       .data(data_in),
-                       .act_cmd(act_cmd));
-
-                
-   //DDR_TOP ddr_top (.intf(intf),
-   //                 .data_in(data_in),
-   //                 .act_cmd(act_cmd),
-   //                 .mrs_update(mrs_update),
-   //                 .w_pre(w_pre),
-   //                 .r_pre(r_pre),
-   //                 .burst_length (burst_length),
-   //                 .al_dly(al_dly),
-   //                 .cas_dly(cas_dly),
-   //                 .wr_dly(wr_dly),
-   //                 .rd_dly(rd_dly),
-   //                 .dev_busy(dev_busy));
+                    .rd_dly(rd_dly),
+//                    .BL(BL),
+//                    .RD_PRE(RD_PRE),
+//                    .dev_rd(dev_rd),
+//                    .dev_busy(dev_busy),
+//                    .dev_rw(dev_rw),
+//                    .next_cmd(next_cmd)
+                    );
    
    
  

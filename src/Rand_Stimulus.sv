@@ -5,14 +5,14 @@
 
 `include "ddr_package.pkg"
 module Rand_Stimulus( DDR_INTERFACE intf,
-                CTRL_INTERFACE ctrl_intf,
-                input logic dev_busy,
-                output input_data_type data,
-                output logic act_cmd);
+                      TB_INTEFACE tb_intf);
+//                input logic dev_busy,next_cmd,
+//                output input_data_type data,
+//                output logic act_cmd);
 
 
 // Set number of operations to be stored in the queue
-parameter num_op = 10;
+parameter num_op = 30;
 
 
 // Use class for randomization
@@ -30,6 +30,10 @@ endclass
 class Gen_Packet;
     rand Packet Packet_array[];
     bit [31:0] addr_queue[$];
+    constraint rw {
+         foreach (Packet_array[i])
+             Packet_array[i].op_r dist {READ:= 50, WRITE:= 50};
+             }          
     
     function void post_randomize;
          foreach (Packet_array[i]) begin
@@ -37,8 +41,7 @@ class Gen_Packet;
                Packet_array[i].op_r = WRITE;
             if(Packet_array[i].op_r == WRITE) 
                addr_queue = {Packet_array[i].addr_r, addr_queue};   
-            if ((i > 0) && (Packet_array [i-1].op_r == WRITE) &&
-                      (Packet_array [i].op_r   == READ ))
+            if ((i > 0) && (Packet_array [i].op_r   == READ ))
                 Packet_array[i].addr_r   = addr_queue.pop_back;
          end             
     endfunction
@@ -79,20 +82,20 @@ initial begin
  	   su.push_front(Stim_st);
 	end
 
-	wait (ctrl_intf.rw_proc);
+	wait (!tb_intf.dev_busy);
 do
-   @ (posedge act_cmd ) begin
-      data = su.pop_back;
+   @ (posedge tb_intf.act_cmd ) begin
+      tb_intf.data = su.pop_back;
     end  
 while (su.size != 0);   
 end
 
 always_ff @ (intf.clock_t)
 begin
-    if ((!dev_busy) && (su.size >0 ) && (ctrl_intf.act_idle))
-       act_cmd <= 1'b1;
+    if ((!tb_intf.dev_busy) &&(su.size >0 ) && (tb_intf.next_cmd))
+       tb_intf.act_cmd <= 1'b1;
     else   
-       act_cmd <= 1'b0;
+       tb_intf.act_cmd <= 1'b0;
 
 end
 

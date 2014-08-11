@@ -15,7 +15,7 @@
                   
 interface CTRL_INTERFACE;   
 
-mode_register_type mode_reg, pre_reg, mrs_update_cmd,mr0;
+mode_register_type mode_reg, pre_reg, mrs_update_cmd, mr0;
 mem_addr_type mem_addr;
 logic mrs_rdy, act_rdy, cas_rdy, rw_rdy, mrs_update_rdy;
 logic zqcl_rdy, refresh_rdy, des_rdy, pre_rdy;

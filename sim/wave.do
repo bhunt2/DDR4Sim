@@ -28,21 +28,11 @@ add wave -noupdate -label physical_addr /top/stim/data.physical_addr
 add wave -noupdate -label data_wr /top/stim/data.data_wr
 add wave -noupdate -label rw /top/stim/data.rw
 add wave -noupdate /top/stim/act_cmd
-add wave -noupdate /top/ctrl_intf/act_idle
 add wave -noupdate /top/stim/dev_busy
-add wave -noupdate /top/burst_act/act_state
-add wave -noupdate /top/burst_act/act_next_state
-add wave -noupdate -radix decimal /top/burst_cas/cas_delay
-add wave -noupdate /top/burst_rw/rw_state
-add wave -noupdate /top/burst_rw/rw_next_state
-add wave -noupdate /top/ctrl_intf/rw_rdy
-add wave -noupdate /top/ctrl_intf/act_rdy
-add wave -noupdate /top/burst_cas/cas_state
-add wave -noupdate /top/burst_cas/cas_next_state
-add wave -noupdate /top/ctrl_intf/cas_rdy
-add wave -noupdate /top/burst_cas/next_cas
+add wave -noupdate /top/ddr_top/dev_busy
+add wave -noupdate /top/ddr_top/ctrl_intf/rw_proc
 TreeUpdate [SetDefaultTree]
-WaveRestoreCursors {{Cursor 1} {456674 ps} 0}
+WaveRestoreCursors {{Cursor 1} {6 ps} 0}
 quietly wave cursor active 1
 configure wave -namecolwidth 150
 configure wave -valuecolwidth 100
@@ -58,4 +48,4 @@ configure wave -griddelta 40
 configure wave -timeline 0
 configure wave -timelineunits ms
 update
-WaveRestoreZoom {454159 ps} {458263 ps}
+WaveRestoreZoom {0 ps} {1056 ps}

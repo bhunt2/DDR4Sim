@@ -17,15 +17,6 @@ module DDR_CONTROLLER (DDR_INTERFACE intf,
                        CTRL_INTERFACE ctrl_intf,
                        input logic mrs_update,[1:0] mrs_bl, 
                        output logic dev_busy);
-                       //input logic config_done,
-                       //input logic rw_idle,
-                       //input logic mrs_update,[1:0] mrs_bl,  //from sim model
-                       //input mode_register_type mr0,
-                       //output logic rw_proc,    //start read/write 
-                       //output logic dev_busy,   //connect to sim to stop data.
-                       //output logic refresh_rdy, 
-                       //output logic mrs_update_rdy, 
-                       //output mode_register_type mrs_update_cmd);       
                        
 ctrl_fsm_type ctrl_state, ctrl_next_state;
   
@@ -35,7 +26,8 @@ logic clear_counter, refresh_almost,refresh_done;
 int   update_counter;
 logic clear_update_counter, update_done;
 
-assign  dev_busy = (ctrl_state == CTRL_RW)? 1'b0: 1'b1;
+//assign  dev_busy = (ctrl_state == CTRL_RW)? 1'b0: 1'b1;
+assign dev_busy = !ctrl_intf.rw_proc;
   
 //fsm ddr controller
 always_ff @(posedge intf.clock_t, negedge intf.reset_n)

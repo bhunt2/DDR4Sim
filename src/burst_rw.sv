@@ -103,6 +103,7 @@ end
 // keep track when CAS occurs 
 always @(intf.reset_n, ctrl_intf.cas_rdy, next_rw)//, rw_state)
 begin
+   int temp;
    if (!intf.reset_n) begin
       rw_cmd_trk.delete();    //delete the queues
       rw_delay  = 0;
@@ -119,11 +120,16 @@ begin
       rw_delay = DELAY - 1;
    end   
    else if ((rw_state == RW_DATA) && (next_rw)) begin
+           temp = rw_cmd_trk.pop_front;
+           
            if (rw_trk.pop_front === READ)
               DELAY = ctrl_intf.RD_DELAY;
            else
               DELAY = ctrl_intf.WR_DELAY;         
-           rw_delay = DELAY - rw_cmd_trk.pop_front -1;
+           if (DELAY > (temp + 1))    
+                rw_delay = DELAY - rw_cmd_trk.pop_front -1;
+            else
+                rw_delay = 2;         // enough for the preamble 
       
            //update # cycles each RW cmd waited
            foreach (rw_cmd_trk[i]) 

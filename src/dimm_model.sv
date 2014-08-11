@@ -14,7 +14,10 @@
 `include "ddr_package.pkg"
 
 module DIMM_MODEL (DDR_INTERFACE intf,
-                   CTRL_INTERFACE ctrl_intf);
+                   TB_INTERFACE tb_intf);
+//                   input int BL, RD_PRE,
+//                   input logic dev_rd, 
+//                   input logic [1:0] dev_rw);
 
 
 
@@ -109,7 +112,7 @@ assign wr_end = (((cycle_8[4]) && (!cycle_8_d)) ||
 //create one clock cylce of rd_start               
 always_ff @(posedge intf.clock_t)
 begin
-    rd_start <= ((ctrl_intf.rw_rdy) && (ctrl_intf.dimm_rd == READ));                
+    rd_start <= ((tb_intf.dev_rd) && (tb_intf.dev_rw == READ));                
 end
 
 
@@ -155,7 +158,7 @@ end
 //capture data on the posedge dqsc_t. Ignore the last on due to twpr
 always_ff @(posedge intf.dqs_t)
 begin
-   if(ctrl_intf.dimm_rd == WRITE) 
+   if(tb_intf.dev_rw == WRITE) 
       data_t <= {intf.dq, data_t[4:1]};
       
 end
@@ -163,9 +166,9 @@ end
 //capture data on the dqsc_c. Note ignore the first rising edge for pre_amble 
 always_ff @(posedge intf.dqs_c)
 begin
-   if (ctrl_intf.dimm_rd == WRITE) begin
+   if (tb_intf.dev_rw == WRITE) begin
       data_c <= {intf.dq,data_c[4:1]};
-      if (ctrl_intf.BL == 8) 
+      if (tb_intf.BL == 8) 
          cycle_8 <= {cycle_8[3:0], cycle_8[4]};
       else
          cycle_4 <= {cycle_4[1:0], cycle_4[2]};     
@@ -185,7 +188,7 @@ begin
    end;   
    
    dimm_index = {row_addr,col_addr};  
-   if ((wr_end_d) && (ctrl_intf.BL == 8))
+   if ((wr_end_d) && (tb_intf.BL == 8))
       dimm[{row_addr,col_addr}] = {data_c[4], data_t[3], data_c[3], data_t[2], 
                                    data_c[2], data_t[1], data_c[1], data_t[0]};
       
@@ -195,20 +198,20 @@ begin
         dimm[{row_addr,col_addr}] = {data_c[4],data_t[3],data_c[3],data_t[2]} ;   
    end
       
-   if ((rd_start_d) && (ctrl_intf.BL == 8)) begin
+   if ((rd_start_d) && (tb_intf.BL == 8)) begin
 //      $display ("Dimm index read %0x", dimm_index);
       data_out.data_wr = dimm[{row_addr,col_addr}];
       data_out.rw      = READ;
-      data_out.burst_length = ctrl_intf.BL;
-      data_out.preamble = ctrl_intf.RD_PRE;
+      data_out.burst_length = tb_intf.BL;
+      data_out.preamble = tb_intf.RD_PRE;
    end   
    else if (rd_start_d) begin
 //      $display ("Dimm index read %0x", dimm_index);
       read_count ++;
       data_out.data_wr[31:0] = dimm[dimm_index];//dimm[{row_addr,col_addr}];  
       data_out.rw            = READ;
-      data_out.burst_length  = ctrl_intf.BL;
-      data_out.preamble = ctrl_intf.RD_PRE;
+      data_out.burst_length  = tb_intf.BL;
+      data_out.preamble = tb_intf.RD_PRE;
    end
 end
 

@@ -20,16 +20,8 @@
 //note: use clock_t as main clock
 module BURST_ACT (DDR_INTERFACE intf,
                   CTRL_INTERFACE ctrl_intf,
-                  input logic act_cmd
-                  );
-                  //input logic act_cmd,            //from simulation model
-                  //input mem_addr_type mem_addr,
-                  //input int WR_DELAY,
-                  //input logic rw_proc,           //from controller
-                  //input logic data_idle,                            //from rw
-                  //input logic cas_rdy, cas_idle, [1:0] rw_request,  //from cas
-                  //output mode_register_type pre_reg, pre_rdy,       //PRE cmd
-                  //output logic rw_idle, act_rdy);
+                  TB_INTERFACE   tb_intf);
+                  //input logic act_cmd
                   
 
 act_fsm_type act_state, act_next_state;
@@ -78,8 +70,8 @@ begin
          ctrl_intf.act_idle <= 1'b1;
          ctrl_intf.pre_rdy  <= 1'b0;
          ctrl_intf.act_rdy  <= 1'b0;
-         if ((act_cmd) && (ctrl_intf.rw_proc)) begin  //NOTE PUT THE LINE
-         //if (act_cmd) begin                             //BACK AFTER DEBUG
+         if ((tb_intf.act_cmd) && (ctrl_intf.rw_proc)) begin  //NOTE PUT THE LINE
+                                                              //BACK AFTER DEBUG
             act_next_state <= ACT_WAIT_STATE;
             bank_activated_chk();               
          end   

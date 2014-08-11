@@ -14,7 +14,6 @@ vlog -work work -sv ../src/memory_check.sv
 vlog -work work -sv ../src/ddr_clock.sv
 vlog -work work -sv ../src/Rand_Stimulus.sv
 vlog -work work -sv ../src/test.sv
-vlog -work work -sv ../src/Assertions.sv
 vlog -work work -sv ../src/Stimulus_save.sv
 vsim -novopt work.top
 do wave.do
