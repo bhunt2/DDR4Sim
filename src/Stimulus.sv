@@ -1,8 +1,7 @@
-// This module reads in bit vectors containing used as stimulus for a DDR4 simulation.
-// It stores the bit vector in a stuct that contains a 64 bit data segement, an 29 bit 
+// This module randomly generates data, address, and operation fields for testing a DDR4 simulation.
+// It stores these in a structure that contains a 64 bit data segement, an 32 bit 
 // address segement, and 2 bit op code segement that specifies a read or write operation.
-// It does this in a queue. 
-
+// It then puts these values in a queue to be called by the testbench. 
 
 `include "ddr_package.pkg"
 module Stimulus(CTRL_INTERFACE ctrl_intf,
@@ -10,41 +9,60 @@ module Stimulus(CTRL_INTERFACE ctrl_intf,
                 output input_data_type data,
                 output logic act_cmd);
 
-timeunit 10ps;
-timeprecision 1ps;
+// Set number of operations to be stored in the queue
+parameter num_op = 100;
+int data_count;
 
+// Define the packed structure for the queue
 //typedef struct packed{
 //	bit [63:0] data;
-//	bit [28:0] addr;
+//	bit [31:0] addr;
 //	bit [1:0] op;} Stim_struct;
 
+// Create union with equal sized bit vector for easy transfer
 //typedef union packed{
-//	bit [94:0] bv; 
+//	bit [97:0] bv; 
 //	Stim_struct Struct;
 //	} stim_u;
 
-//stim_u su[$], temp;
+// Use class for randomization
+class Packet;
+// Random variables
+randc bit [63:0] data_r;
+randc bit [31:0] addr_r;
+randc bit [1:0] op_r;
+// Limit values for op to R/W (01 or 10)
+//constraint c {op_r >= 2'b01;
+//	          op_r <= 2'b10;}
+constraint c {op_r >= 2'b02;}
+
+endclass
+
+
+// define queue, temp structure union, and class.
 input_data_type su[$], temp;
-int data_count = 0;
+Packet p;
 
-initial begin 
-int file, r1, r2, r3;
 
-data_count = 0;
+initial begin
+// Generate random fields for num_op operations
+for(int i = num_op; i > 0; i--)begin
+	p = new();  // create a packet
+	p.c.constraint_mode(1);  // turn constraint on
+	assert (p.randomize())
+	else $fatal(0, "Packet::randomize failed");
+	temp.data_wr = p.data_r;
+	temp.physical_addr = p.addr_r;
+	temp.rw = p.op_r;
+	su.push_front(temp);
+//	$display("op: %h",temp.Struct.op);
+//	$display("addr: %h",temp.Struct.addr);
+//	$display("data: %h",temp.Struct.data);
+	$display("op: %h",temp.rw);
+	$display("addr: %h",temp.physical_addr);
+	$display("data: %h",temp.data_wr);
 
-#10
-file = $fopen("../sim/Fulltest.txt","r");if(file===0)begin
-	$display("Error: Can not open the file.");
 end
-
-	while (! $feof(file)) begin
-		r1 = $fscanf(file,"%h",temp.physical_addr);
-		r2 = $fscanf(file,"%h",temp.data_wr);
-		r3 = $fscanf(file,"%h",temp.rw);
-		su.push_front(temp);
-		
-	end
-//$display("Contents: %p",su);
 wait (ctrl_intf.rw_proc);
 do
    @ (posedge act_cmd ) begin
@@ -63,5 +81,5 @@ begin
 
 end
 
-
 endmodule 
+

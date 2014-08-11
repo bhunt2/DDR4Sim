@@ -42,7 +42,7 @@ task init_task ();
    ctrl_intf.des_rdy   <= 1'b0;
    ctrl_intf.zqcl_rdy  <= 1'b0;
    ctrl_intf.config_done <= 1'b0;
-//   wait (!intf.reset_n)
+
    
    wait (intf.reset_n); repeat (tCKE_L) @ (posedge intf.clock_t);
    intf.cke <= 1'b1;

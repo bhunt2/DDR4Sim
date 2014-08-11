@@ -47,28 +47,7 @@ wire ODT;
    
  
    
-//simple clock resource 
-initial
-begin 
-   clock_n = FALSE;
-   forever #HALF_PERIOD clock_n = ~clock_n;
-end   
 
-//differential clock 
-initial
-begin 
-   clock_t = TRUE;
-   forever #HALF_PERIOD clock_t = ~clock_t;
-end 
-   
-//write clock with 90 phase shift, double freq to clock_n
-initial
-begin
-   clock_r = FALSE;
-   #QUARTER_PERIOD;
-   forever #QUARTER_PERIOD clock_r = ~clock_r;
-end    
-   
 
    
 // method for strobe pins

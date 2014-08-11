@@ -19,6 +19,7 @@ logic dev_busy;
    CTRL_INTERFACE ctrl_intf();
    DIMM_MODEL dimm(.intf(intf),
                    .ctrl_intf(ctrl_intf));
+   DDR_CLOCK ddr_clock (.intf(intf));                
                    
    DDR_CONTROLLER ddr_ctrl (.intf(intf),
                             .ctrl_intf(ctrl_intf),
