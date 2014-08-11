@@ -17,7 +17,7 @@
 
 `include "ddr_package.pkg"
 interface DDR_INTERFACE;
-timeunit 1ps;
+timeunit 10ps;
 timeprecision 1ps;
 
 
@@ -37,7 +37,8 @@ logic [BA_WIDTH - 1:0] ba_addr;
 logic [2:0] C2_0 = CHIP_ID;
 
 logic [DATA_WIDTH-1:0] dq;
-logic dqs_t, dqs_c;
+logic dqs_t = 1'b1;
+logic dqs_c = 1'b1;
    
    //Not necessary use
 wire dm_n, dbi_n, tdqs_t;
@@ -68,12 +69,7 @@ begin
    forever #QUARTER_PERIOD clock_r = ~clock_r;
 end    
    
-//data strobe/read clock , double freq to clock_n
-initial
-begin
-   clock_w = FALSE;
-   forever #QUARTER_PERIOD clock_w = ~clock_w;
-end    
+
    
 // method for strobe pins
 task set_strobe_pins (input rw_data_type data);
@@ -81,13 +77,18 @@ task set_strobe_pins (input rw_data_type data);
    dqs_t = 1'b1;
    dqs_c = 1'b0;
    repeat (data.preamble-1) @ (posedge clock_r); 
-   repeat (data.burst_length + 2 ) begin
+   repeat (data.burst_length + 1 ) begin
      @(posedge clock_r) 
      dqs_t = ~dqs_t;
      dqs_c = ~dqs_c;
    end; 
-     dqs_t <= 1;
-     dqs_c <= 1;
+   repeat (1) begin
+     @ (posedge clock_r)
+     dqs_t = ~dqs_t;
+     dqs_c =1'b1;
+   end  
+     dqs_t = 1;
+     dqs_c = 1;
 endtask
 
 //method for write data 
@@ -102,8 +103,17 @@ task set_wdata_pins (input rw_data_type data);
    dq = 'z;
 endtask
    
-   // method for read data (e.g. data in from the Memory) and strobe pins
- 
+// method for read data (e.g. data in from the Memory)
+task set_rdata_pins (input rw_data_type data);
+@ (posedge clock_r) dq = 'z;
+   repeat (data.preamble) @(posedge clock_r);
+   repeat (data.burst_length +1) begin
+      @ (posedge clock_r ) 
+      dq = data.data_wr[7:0];
+      data.data_wr = {8'h00, data.data_wr[63:8]};
+   end
+   dq = 'z;
+endtask 
                          
  
  
@@ -122,7 +132,7 @@ begin
       addr17    <= 1'b1;
       ras_n_a16 <= 1'b1;
       cas_n_a15 <= 1'b1;
-      we_n_a14  <= 1'b1;
+      we_n_a14  <= command.cmd_data.addr.row_addr [14];
       addr13    <= command.cmd_data.addr.row_addr [13];
       bc_n_a12  <= command.cmd_data.addr.row_addr [12];
       addr11    <= command.cmd_data.addr.row_addr [11];

@@ -35,7 +35,6 @@ module BURST_ACT (DDR_INTERFACE intf,
 act_fsm_type act_state, act_next_state;
 int act_counter;
 logic clear_act_counter;
-logic act_idle;
    
 logic hit = 1'b0;    //same bank and row
 logic miss= 1'b0;    //same bank different row
@@ -50,7 +49,7 @@ command_type pre_command;
 //idle when all ACT, CAS, and RW sequence are all idle
 always_comb
 begin
-   ctrl_intf.rw_idle <= act_idle && ctrl_intf.cas_idle && ctrl_intf.data_idle;
+   ctrl_intf.rw_idle <= ctrl_intf.act_idle && ctrl_intf.cas_idle && ctrl_intf.data_idle;
 end
    
 //fsm control timing between ACT and data 
@@ -65,10 +64,10 @@ end
 always_comb
 begin
    if (!intf.reset_n) begin 
-      act_next_state    <= ACT_IDLE;
-      clear_act_counter <= 1'b1;
-      act_idle          <= 1'b0;
-      ctrl_intf.act_rdy <= 1'b0;
+      act_next_state     <= ACT_IDLE;
+      clear_act_counter  <= 1'b1;
+      ctrl_intf.act_idle <= 1'b0;
+      ctrl_intf.act_rdy  <= 1'b0;
       bank_ini           = 1'b1;
       bank_activated_chk();         
    end
@@ -79,18 +78,21 @@ begin
          ctrl_intf.act_idle <= 1'b1;
          ctrl_intf.pre_rdy  <= 1'b0;
          ctrl_intf.act_rdy  <= 1'b0;
-         if ((act_cmd) && (ctrl_intf.rw_proc))
+         if ((act_cmd) && (ctrl_intf.rw_proc)) begin  //NOTE PUT THE LINE
+         //if (act_cmd) begin                             //BACK AFTER DEBUG
             act_next_state <= ACT_WAIT_STATE;
+            bank_activated_chk();               
+         end   
       end
               
       ACT_WAIT_STATE: begin  
-         clear_act_counter <= 1'b0;  
-         act_idle          <= 1'b0;
-         bank_activated_chk();    
+         clear_act_counter  <= 1'b0;  
+         ctrl_intf.act_idle <= 1'b0;
                
          if ((act_counter == ACT_DELAY) && (hit)) begin  
             act_next_state   <= ACT_CAS;  
             ctrl_intf.act_rdy <= 1'b1;
+            ctrl_intf.act_rw  <= ctrl_intf.rw;
          end
             else if ((act_counter == ACT_DELAY) && (miss))
                act_next_state <= PRE_WAIT_DATA;
@@ -99,12 +101,13 @@ begin
                if (ctrl_intf.cas_rdy == 1'b0) begin
                   act_next_state    <= ACT_CMD;
                   ctrl_intf.act_rdy <= 1'b1;
+                  ctrl_intf.act_rw  <= ctrl_intf.rw;
                end else   //delay to avoid assert both CAS and ACT in one cycle         
-                  act_next_state <= ACT_ONE;  
+                  act_next_state <= ACT_ONE_DELAY;  
             end
       end             
          
-      ACT_ONE: begin
+      ACT_ONE_DELAY: begin
          act_next_state    <= ACT_CMD;
          ctrl_intf.act_rdy <= 1'b1;
          ctrl_intf.act_rw  <= ctrl_intf.rw;
@@ -156,6 +159,7 @@ begin
          clear_act_counter <= 1'b0;
          if (act_counter == tRP) begin
             ctrl_intf.act_rdy <= 1'b1;
+            ctrl_intf.act_rw  <= ctrl_intf.rw;
             act_next_state    <= ACT_CMD;
          end        
       end
@@ -173,32 +177,35 @@ begin
      act_counter <= act_counter + 1;
 end 
      
-task bank_activated_chk();
+function void bank_activated_chk();
 begin
-   static int index;
+   int index;
+   static logic [14:0] mem = 'z;
    miss = 1'b0;
    hit  = 1'b0;
+  
    index = int'({ctrl_intf.mem_addr.bg_addr,ctrl_intf.mem_addr.ba_addr});
+      
    if (bank_ini)
-      bank_activated = 'x;
+      bank_activated = 'z;
    else begin    
-      if (bank_activated[index] === ctrl_intf.mem_addr.row_addr) begin
-         hit = 1'b1;
-         miss = 1'b0; 
+      if (bank_activated[index] == ctrl_intf.mem_addr.row_addr) begin
+      //if (mem == ctrl_intf.mem_addr.row_addr) begin
+         hit   = 1'b1;
+         miss  = 1'b0; 
       end
-      else if (bank_activated[index] === 'x) begin //bank not activated
-         hit = 1'b0;
-         miss = 1'b0;   
-         bank_activated[index] = mem_addr.row_addr;
-      end
-      else if (bank_activated[index] !== ctrl_intf.mem_addr.row_addr) begin
-                hit = 1'b0;
-                miss= 1'b1;     
-                bank_activated[index] ='1;     
-      end
+ 
+      else begin //if (bank_activated[index] != ctrl_intf.mem_addr.row_addr) begin
+           hit = 1'b0;
+           if (bank_activated[index] === mem)          //bank not activated           
+               miss = 1'b0;
+           else 
+               miss = 1'b1;       
+           bank_activated[index] = ctrl_intf.mem_addr.row_addr;
+           end     
       end
    end
-endtask
+endfunction
      
 //function to calculate the time delay from previous CAS to precharge.
 //previous CAS was read, then RTP =  tRTP

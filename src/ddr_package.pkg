@@ -49,7 +49,8 @@ package ddr_pkg;
    parameter CAS_DELAY = 12.5/nCK;
 
    //timming parameter for reset
-   parameter tCKE_L   = 500000/nCK;
+   //parameter tCKE_L   = 500000/nCK;
+   parameter tCKE_L   = 500/nCK;
    parameter tXPR     = 5;
    parameter tMRD     = 8;
    parameter tMOD     = 24;
@@ -68,7 +69,7 @@ package ddr_pkg;
                 ctrl_fsm_type;
   
    //typedef for states in BURST_ACT
-   typedef enum {ACT_IDLE, ACT_WAIT_STATE, ACT_CMD, ACT_CAS, ACT_ONE,
+   typedef enum {ACT_IDLE, ACT_WAIT_STATE, ACT_CMD, ACT_CAS, ACT_ONE_DELAY,
                  PRE_WAIT_DATA, PRE_WAIT_STATE,
                  PRE_CMD, PRE_IDLE} act_fsm_type;
    
@@ -80,9 +81,13 @@ package ddr_pkg;
    
    
     //typedef for write data (data-out)     
-   typedef logic [8*DATA_WIDTH -1:0] data_type;
+   typedef logic [8*DATA_WIDTH -1:0]    data_type;
+
    //typedef  for physical address
    typedef logic [ADDR_WIDTH -1:0] addr_type;
+   
+   //typedef  for physical address
+   typedef logic [TA_WIDTH -1:0] dimm_addr_type;
    
    //typedef for MRS register from stimulus
    typedef logic [MRS_WIDTH -1:0] mode_register_type;

@@ -19,7 +19,7 @@
 
 //note: use clock_t as main clock
 module BURST_RW (DDR_INTERFACE intf,
-                 CTRL_INTF ctrl_intf);
+                 CTRL_INTERFACE ctrl_intf);
                  //input int RD_DELAY, WR_DELAY, //from BURST DATA module
                  //input logic cas_rdy,          //cas_rdy from cas module
                  //input logic [1:0] rw,         //from cas module
@@ -64,7 +64,11 @@ begin
             ctrl_intf.data_idle  <= 1'b1;
             if (ctrl_intf.cas_rdy) begin
                rw_next_state    <= RW_WAIT_STATE;
-               clear_rw_counter <= 1'b1;               
+               clear_rw_counter <= 1'b1;  
+            end else 
+            begin
+               rw_next_state    <= RW_IDLE;
+               clear_rw_counter <= 1'b0;                
             end
          end
                
@@ -76,7 +80,8 @@ begin
                 rw_next_state    <= RW_DATA;
                 clear_rw_counter <= 1'b1;
                 ctrl_intf.rw_rdy <= 1'b1;
-            end   
+            end else
+                rw_next_state    <= RW_WAIT_STATE;       
          end
                
          RW_DATA: begin
@@ -96,7 +101,7 @@ begin
 end  
 
 // keep track when CAS occurs 
-always @(intf.reset_n, ctrl_intf.cas_rdy, next_rw, rw_state)
+always @(intf.reset_n, ctrl_intf.cas_rdy, next_rw)//, rw_state)
 begin
    if (!intf.reset_n) begin
       rw_cmd_trk.delete();    //delete the queues
@@ -104,16 +109,17 @@ begin
    end
       
    //calculate # cycles each RW command waited in queue
-   if ((rw_state == RW_IDLE) && (ctrl_intf.cas_rdy))begin
+   if(((rw_state == RW_IDLE) || (rw_state == RW_DATA)) && 
+       (ctrl_intf.cas_rdy))begin
+       
       if (ctrl_intf.act_rw == READ)
          DELAY = ctrl_intf.RD_DELAY;
       else 
          DELAY = ctrl_intf.WR_DELAY;   
       rw_delay = DELAY - 1;
    end   
-   else if ((rw_state == RW_DATA) && 
-            (next_rw)) begin
-           if (rw_cmd.pop_front === 2'b01) 
+   else if ((rw_state == RW_DATA) && (next_rw)) begin
+           if (rw_trk.pop_front === READ)
               DELAY = ctrl_intf.RD_DELAY;
            else
               DELAY = ctrl_intf.WR_DELAY;         
@@ -125,7 +131,7 @@ begin
    end
    
    if ((ctrl_intf.cas_rdy) &&
-       (rw_state != RW_IDLE)) begin
+       (rw_state != RW_IDLE) && (rw_state != RW_DATA)) begin
       rw_cmd_trk = {rw_cmd_trk, (rw_delay - rw_counter)};
       rw_trk     = {rw_trk, ctrl_intf.cas_rw}; 
    end                

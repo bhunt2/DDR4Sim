@@ -68,10 +68,12 @@ begin
            ctrl_intf.cas_rdy   <= 1'b0;
            ctrl_intf.cas_idle  <= 1'b1;
            clear_cas_counter   <= 1'b1;   
+           if (ctrl_intf.pre_rdy)
+              ignore <= 1'b0;
            if (ctrl_intf.act_rdy ) begin
               cas_next_state <= CAS_WAIT_STATE;
-              //execute one time after reset
-              if (!ignore) begin
+              //execute reset or after precharge command
+              if (!ignore)  begin
                 prev_rq <= ctrl_intf.act_rw;
                 ignore  <= 1'b1;
               end  
@@ -87,17 +89,20 @@ begin
              clear_cas_counter <= 1'b1;
              //determine back to back read or write)
              if (prev_rq == request) begin
+                 
                 cas_next_state    <= CAS_CMD; 
                 ctrl_intf.cas_rdy <= 1'b1;
                 ctrl_intf.cas_rw  <= request;
-             end                                      
+                prev_rq           <= request;
+             end 
+                
              else begin             // read to write OR write to read
                 
                 extra_wait(.prev_rq(prev_rq),
                            .request(request),
                            .rtw(rtw),
                            .extra_count(extra_count));
-                           
+                prev_rq           <= request;           
                 if (rtw == 1'b1) 
                    cas_next_state <= CAS_WAIT_EXTRA;           
                 else            
@@ -105,11 +110,11 @@ begin
                 end
             end
         end
-              
+        
         CAS_CMD: begin
-           prev_rq           <= request;
+           
            ctrl_intf.cas_rdy <= 1'b0;
-           clear_cas_counter <= 1'b0;
+           clear_cas_counter <= 1'b1;
            //determine the handshake signal clear_cas_counter above should be 
            //here or move to next previous state to speed up 1 clock cycle
            if (next_cas) begin
@@ -122,10 +127,8 @@ begin
         CAS_WAIT_DATA: begin 
            clear_cas_counter <= 1'b1;
                   
-           if (ctrl_intf.rw_done) begin
-               cas_next_state    <= CAS_WAIT_EXTRA;
-               clear_cas_counter <= 1'b1;                     
-           end                                  
+           if (ctrl_intf.rw_done)
+               cas_next_state    <= CAS_WAIT_EXTRA;                          
         end
                
         CAS_WAIT_EXTRA: begin
@@ -135,24 +138,28 @@ begin
                cas_next_state    <= CAS_CMD;
                ctrl_intf.cas_rdy <= 1'b1;
                ctrl_intf.cas_rw  <= request;
+               clear_cas_counter <= 1'b1;
            end
         end
-              
+           
+        default: cas_next_state <= CAS_IDLE;   
+                      
       endcase
    end
 end  
          
 //tracking on ACT command to calulate cas_delay and r/w request
-always @ (intf.reset_n, ctrl_intf.act_rdy, ctrl_intf.act_rw, cas_state)
+always @ (intf.reset_n, ctrl_intf.act_rdy, next_cas)//, ctrl_intf.act_rw, cas_state)
 begin
    if (!intf.reset_n) begin
-      act_rdy_trk.delete();
+      act_cmd_trk.delete();
       act_rw_trk.delete();
       cas_delay = 0;
       request   = '0;
    end
    
-   if ((cas_state == CAS_IDLE) && (ctrl_intf.act_rdy)) begin
+   if (((cas_state == CAS_IDLE) || (cas_state == CAS_CMD)) && 
+       (ctrl_intf.act_rdy)) begin
       cas_delay = CAS_DELAY - 1;
       request   = ctrl_intf.act_rw;
    end 
@@ -165,12 +172,14 @@ begin
          act_cmd_trk [i] = {(act_cmd_trk[i] + cas_delay +1 )};
    end
          
-   if ((ctrl_intf.act_rdy) && (cas_state != CAS_IDLE)) begin
+   if ((ctrl_intf.act_rdy) && 
+       ((cas_state != CAS_IDLE)  && (cas_state != CAS_CMD))) begin
       act_cmd_trk = {act_cmd_trk, (cas_delay - cas_counter )}; 
       
    //if ((^ctrl_intf.act_rw) && (cas_state != CAS_IDLE))       
       act_rw_trk  = {act_rw_trk, ctrl_intf.act_rw};    
-   end                 
+   end       
+   //$display ("Size of the cas queue %d  %d", act_cmd_trk.size, act_rw_trk.size);          
 end         
 
       
@@ -186,8 +195,8 @@ end
 //determine act cmd avail in queue.
 always_ff @ (posedge intf.clock_t)
 begin
-   if ((cas_next_state == RW_DATA) &&
-       (act_rdy_trk.size != 0) ) 
+   if ((cas_next_state == CAS_CMD) &&
+       (act_cmd_trk.size != 0) ) 
       next_cas <= 1'b1;
    else
       next_cas <= 1'b0;

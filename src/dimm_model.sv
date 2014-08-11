@@ -16,6 +16,8 @@
 module DIMM_MODEL (DDR_INTERFACE intf,
                    CTRL_INTERFACE ctrl_intf);
 
+
+
 parameter MRS_C = 5'b01000;
 parameter REF_C = 5'b01001;
 parameter PRE_C = 5'b01010;

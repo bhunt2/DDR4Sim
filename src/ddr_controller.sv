@@ -13,8 +13,8 @@
 
 `include "ddr_package.pkg"
 
-module DDR_CONTROLLER (DDR_INTF intf,
-                       CTRL_INTF ctrl_intf,
+module DDR_CONTROLLER (DDR_INTERFACE intf,
+                       CTRL_INTERFACE ctrl_intf,
                        input logic mrs_update,[1:0] mrs_bl, 
                        output logic dev_busy);
                        //input logic config_done,
@@ -51,6 +51,9 @@ end
 //
 always_comb
 begin
+   if (!intf.reset_n)
+      ctrl_next_state <= CTRL_IDLE;
+      
    case (ctrl_state)
    CTRL_IDLE: begin
       clear_counter            <= 1'b1;
@@ -63,17 +66,19 @@ begin
             
    CTRL_INIT: begin  
       clear_counter <= 1'b1;
-      if(ctrl_intf.config_done)
+      if(ctrl_intf.config_done) begin
          ctrl_next_state  <= CTRL_RW;
          ctrl_intf.rw_proc<= 1'b1;
-      end
+      end   
+   end
            
    CTRL_RW: begin
       clear_counter <= 1'b0;    // assume refresh occurs only rw, and update
-      if ((mrs_update) || (refresh_almost))
+      if ((mrs_update) || (refresh_almost)) begin
          ctrl_next_state    <= CTRL_WAIT;    
          ctrl_intf.rw_proc  <= 1'b0;                    
       end
+   end
            
    CTRL_WAIT: begin
       if (ctrl_intf.rw_idle) begin
@@ -98,9 +103,10 @@ begin
    end
            
    CTRL_REFRESH: begin
-      if (refresh_done)
+      if (refresh_done) begin
          ctrl_next_state   <= CTRL_RW;
          ctrl_intf.rw_proc <= 1'b1;
+      end   
       end
              
    default: ctrl_next_state <= CTRL_IDLE;
@@ -109,7 +115,7 @@ begin
 end             
               
       // simple counter 
-    always_ff @(posedge intf.clock_t, posedge intf.reset_n)
+    always_ff @(posedge intf.clock_t)
     begin
        if(clear_counter == 1'b1) begin
           refresh_counter      <= 0;
@@ -121,8 +127,10 @@ end
           refresh_counter <= refresh_counter + 1;
           if (refresh_counter == tREF - 100) 
              refresh_almost <= 1'b1;
-          else if (refresh_counter == tREF)
+          else if (refresh_counter == tREF) begin
+             refresh_almost <= 1'b0;
              ctrl_intf.refresh_rdy <= 1'b1;
+          end   
           else if (refresh_counter == tREF + 1)
              ctrl_intf.refresh_rdy <= 1'b0;   
           else if (refresh_counter == tREF + tRC)
@@ -131,7 +139,7 @@ end
      end 
       
        // simple act_counter 
-    always_ff @(posedge intf.clock_t, posedge intf.reset_n)
+    always_ff @(posedge intf.clock_t)
     begin
        if(clear_update_counter == 1'b1) begin
           update_done    <= 1'b0;

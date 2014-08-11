@@ -13,11 +13,11 @@
 
 `include "ddr_package.pkg"
 
-module BURST_CONF (DDR_INTF intf,
-                   CTRL_INTF ctrl_intf,
+module BURST_CONF (DDR_INTERFACE intf,
+                   CTRL_INTERFACE ctrl_intf,
                    //set up timing parameters from stimulus
                    input int cas_dly, wr_dly,rd_dly,
-                   input logic w_pre, r_pre, [1:0] al_dly,burst_length
+                   input logic w_pre, r_pre, [1:0] al_dly, burst_length
                    //output logic mrs_rdy, des_rdy,zqcl_rdy,config_done,
                    //output mode_register_type mode_reg, mr0  //mr0 to DDR_CONTROLLER                   
                    );
@@ -30,7 +30,7 @@ bit [3:0] rd;
 //use always block to init the sequence any time reset asserted.
 always@ (intf.reset_n)
 begin
-   if (!intf.reset_n)
+   if(!intf.reset_n)
       init_task();
 end
 
@@ -42,7 +42,9 @@ task init_task ();
    ctrl_intf.des_rdy   <= 1'b0;
    ctrl_intf.zqcl_rdy  <= 1'b0;
    ctrl_intf.config_done <= 1'b0;
-   wait (inft.reset_n); repeat (tCKE_L) @ (posedge intf.clock_t);
+//   wait (!intf.reset_n)
+   
+   wait (intf.reset_n); repeat (tCKE_L) @ (posedge intf.clock_t);
    intf.cke <= 1'b1;
    $cast(cas,(cas_dly -4));
    $cast(wr, (wr_dly -9));
@@ -79,7 +81,7 @@ task init_task ();
    //MR4
    ctrl_intf.mode_reg <= 
          {1'b0,3'b100,1'b0,1'b0,w_pre,r_pre,1'b0,1'b0,3'b000, 1'b0,1'b0,
-          1'b0,1'b0,1'b0,1'b0,1'b0};
+          1'b0,1'b0,1'b0,1'b0};
    @ (posedge intf.clock_t); ctrl_intf.mrs_rdy <= 1'b0; 
    ctrl_intf.des_rdy <= 1'b1;
    ctrl_intf.mode_reg <= 'x;

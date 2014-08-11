@@ -30,7 +30,7 @@ module BURST_DATA (DDR_INTERFACE intf,
 
    //use the mapping table in hw 2 - and assume bit 28th as channel addr
    int map_array [] = '{3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,
-                        23,24,25,26,17,28,29,30};
+                        23,24,25,26,17,28,29,30,31};
 
 
    //act_data_type act_data;
@@ -48,6 +48,8 @@ module BURST_DATA (DDR_INTERFACE intf,
    //timing paramters
    int AL, RPRE, WPRE, tCCD;
    
+   bit act_cmd_d;
+   
 //each act command, the data is placed into 3 separate queues for act, cas,
 // rw data.
 always @(intf.reset_n, ctrl_intf.act_rdy, ctrl_intf.cas_rdy,ctrl_intf.rw_rdy,
@@ -56,7 +58,7 @@ always @(intf.reset_n, ctrl_intf.act_rdy, ctrl_intf.cas_rdy,ctrl_intf.rw_rdy,
    
 begin
   if (!intf.reset_n) begin
-     mem_addr <= '1;
+     //mem_addr <= '1;
      rw_queue.delete();
      cas_queue.delete();      
   end
@@ -93,8 +95,10 @@ begin
             cmd_out.cmd      = NOP;            
       end
           
-      if (ctrl_intf.rw_rdy) 
+      if (ctrl_intf.rw_rdy) begin
          rw_out = rw_queue.pop_front();
+         ctrl_intf.dimm_rd = rw_out.rw;
+      end   
           
        if (ctrl_intf.mrs_rdy) begin
           cmd_out.cmd           = MRS;
@@ -136,10 +140,10 @@ begin
    3'b000: begin
        if (int'(ctrl_intf.mode_reg[6:3]) < 12) 
           ctrl_intf.CL= 9 + int'(ctrl_intf.mode_reg [6:3]); //9-24 clock cycles                    
-          if (int'(ctrl_intf.mode_reg[1:0]) == 2)
-             ctrl_intf.BL = 4;
-          else
-             ctrl_intf.BL = 8;  
+       if (int'(ctrl_intf.mode_reg[1:0]) == 2)
+          ctrl_intf.BL = 4;
+       else
+          ctrl_intf.BL = 8;  
        end
            
    //MR1: capture AL   
@@ -159,8 +163,10 @@ begin
        
    //MR4: capture preamble
    3'b100: begin
-        RPRE = int'(ctrl_intf.mode_reg[11]);
-        WPRE = int'(ctrl_intf.mode_reg[12]);
+        RPRE = int'(ctrl_intf.mode_reg[11])+ 1;
+        WPRE = int'(ctrl_intf.mode_reg[12])+ 1;
+        ctrl_intf.RD_PRE = RPRE;
+        ctrl_intf.WR_PRE = WPRE;
    end
                
    //MR6: CAS-CAS delay
@@ -174,14 +180,20 @@ end
 assign ctrl_intf.RD_DELAY = ctrl_intf.CL + AL - RPRE;
 assign ctrl_intf.WR_DELAY = ctrl_intf.CWL + AL - WPRE;
 
-      //get method to send activate command
+//get method to send strobe pinss
 always_ff @(intf.clock_t)
 begin
-   if ((ctrl_intf.rw_rdy) && (rw_out.rw == 2'b10))
+   if ((ctrl_intf.rw_rdy) && (rw_out.rw == WRITE))begin
+   fork
       intf.set_strobe_pins (.data(rw_out));
-   end;
-         
-//get method to send activate command
+      intf.set_wdata_pins (.data(rw_out));
+   join   
+   end
+end
+     
+     
+            
+//get method to send commands
 always_ff @(intf.clock_t)
 begin
    if ((ctrl_intf.act_rdy) ||(ctrl_intf.cas_rdy)      ||
@@ -193,13 +205,19 @@ begin
       intf.set_cmd_pins(.command(cmd_nop));  
 end
    
+always_ff @(intf.clock_t)
+begin
+   act_cmd_d <= act_cmd;
+   
+end
+
 always @ (act_cmd)
 begin
-   if (act_cmd) begin
+   if (act_cmd_d) begin
       map_addr (.addr(data_in.physical_addr), 
                 .idx_array(map_array),
                 .mem_addr(mem_addr));
-      ctrl_intf.mem_addr_out = mem_addr;  
+      ctrl_intf.mem_addr     = mem_addr;  
       ctrl_intf.rw           = data_in.rw;  
    end       
 end                
