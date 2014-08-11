@@ -3,6 +3,7 @@
 // address segement, and 2 bit op code segement that specifies a read or write operation.
 // It does this in a queue. 
 
+
 `include "ddr_package.pkg"
 module Stimulus(CTRL_INTERFACE ctrl_intf,
                 input logic dev_busy,
@@ -64,4 +65,3 @@ end
 
 
 endmodule 
-
