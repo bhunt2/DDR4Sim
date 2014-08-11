@@ -12,9 +12,10 @@ vlog -work work -sv ../src/ddr_top.sv
 vlog -work work -sv ../src/ddr_interface.sv
 vlog -work work -sv ../src/memory_check.sv
 vlog -work work -sv ../src/ddr_clock.sv
+vlog -work work -sv ../src/Rand_Stimulus.sv
 vlog -work work -sv ../src/test.sv
 vlog -work work -sv ../src/Assersions.sv
 vlog -work work -sv ../src/Stimulus_save.sv
-vsim -voptargs=+acc work.top
+vsim -novopt work.top
 do wave.do
 

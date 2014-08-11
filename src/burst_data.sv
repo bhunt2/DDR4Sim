@@ -46,7 +46,7 @@ module BURST_DATA (DDR_INTERFACE intf,
    command_type  cmd_out,cmd_nop;
    
    //timing paramters
-   int AL, RPRE, WPRE, tCCD;
+   int AL, RPRE, WPRE;
    
    bit act_cmd_d;
    
@@ -172,7 +172,7 @@ begin
                
    //MR6: CAS-CAS delay
    3'b110: begin 
-        tCCD = 4 + int'(ctrl_intf.mode_reg[12:10]);
+        ctrl_intf.tCCD = 4 + int'(ctrl_intf.mode_reg[12:10]);
    end                         
    endcase                        
 end

@@ -37,6 +37,8 @@ int act_cmd_trk[$];        //tracking number of cycles each act command waited
 logic [1:0] act_rw_trk[$]; //track read or write command
 logic[1:0] request, prev_rq ;
 logic ignore = 1'b0;
+
+int temp;
    
 //fsm control timing between CAS and act
 always_ff @(posedge intf.clock_t, negedge intf.reset_n)
@@ -151,6 +153,7 @@ end
 //tracking on ACT command to calulate cas_delay and r/w request
 always @ (intf.reset_n, ctrl_intf.act_rdy, next_cas)//, ctrl_intf.act_rw, cas_state)
 begin
+
    if (!intf.reset_n) begin
       act_cmd_trk.delete();
       act_rw_trk.delete();
@@ -164,7 +167,12 @@ begin
       request   = ctrl_intf.act_rw;
    end 
    else if ((cas_state == CAS_CMD) && (next_cas)) begin
-      cas_delay = CAS_DELAY - act_cmd_trk.pop_front -1;
+      temp = act_cmd_trk.pop_front;
+      if (temp < CAS_DELAY + 1)
+         cas_delay = CAS_DELAY - temp -1;
+      else   
+         cas_delay = ctrl_intf.tCCD;
+      
       request   = act_rw_trk.pop_front;
       
       //update the queue for update # cycles each cmd waited.               
