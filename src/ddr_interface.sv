@@ -16,6 +16,7 @@
                   
 
 `include "ddr_package.pkg"
+`include "Assertions.pkg"
 interface DDR_INTERFACE;
 timeunit 10ps;
 timeprecision 1ps;
@@ -47,7 +48,6 @@ wire ODT;
                    
 
 // Assertions
-import checkerLibrary::*;
 check_reset(posedge clock_t, reset_n, cke);	
 			
 // method for strobe pins
