@@ -125,7 +125,7 @@ task init_task ();
    ctrl_intf.zqcl_rdy 		<= 1'b1;
    ctrl_intf.mode_reg 		<= '1;
    
-   //VALID(DONE)
+   
    @(posedge intf.clock_t); ctrl_intf.zqcl_rdy <= 1'b0; 
    ctrl_intf.des_rdy 		<= 1'b1;
    ctrl_intf.mode_reg 		<= 'x;
