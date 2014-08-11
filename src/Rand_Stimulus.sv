@@ -3,23 +3,17 @@
 // address segement, and 2 bit op code segement that specifies a read or write operation.
 // It then puts these values in a queue to be called by the testbench. 
 
+`include "ddr_package.pkg"
+module Rand_Stimulus( DDR_INTERFACE intf,
+                CTRL_INTERFACE ctrl_intf,
+                input logic dev_busy,
+                output input_data_type data,
+                output logic act_cmd);
 
-module Rand_Stimulus();
 
 // Set number of operations to be stored in the queue
-parameter num_op = 1000;
+parameter num_op = 10;
 
-// Define the packed structure for the queue
-typedef struct packed{
-	bit [63:0] data;
-	bit [31:0] addr;
-	bit [1:0] op;} Stim_struct;
-
-// Create union with equal sized bit vector for easy transfer
-typedef union packed{
-	bit [97:0] bv; 
-	Stim_struct Struct;
-	} stim_u;
 
 // Use class for randomization
 class Packet;
@@ -32,27 +26,75 @@ constraint c {op_r >= 2'b01;
 	      op_r <= 2'b10;}
 endclass
 
-
+//class Gen_Packet
+class Gen_Packet;
+    rand Packet Packet_array[];
+    bit [31:0] addr_queue[$];
+    
+    function void post_randomize;
+         foreach (Packet_array[i]) begin
+            if ((i == 0) || (addr_queue.size == 0))
+               Packet_array[i].op_r = WRITE;
+            if(Packet_array[i].op_r == WRITE) 
+               addr_queue = {Packet_array[i].addr_r, addr_queue};   
+            if ((i > 0) && (Packet_array [i-1].op_r == WRITE) &&
+                      (Packet_array [i].op_r   == READ ))
+                Packet_array[i].addr_r   = addr_queue.pop_back;
+         end             
+    endfunction
+    
+    function new();
+       addr_queue.delete;
+       Packet_array = new[num_op];
+       foreach (Packet_array[i])
+          Packet_array[i] = new();
+    endfunction
+    
+    function void print_all() ;
+    foreach (Packet_array[i])
+       $display ("addr = %h, data = %h, rw = %h", Packet_array[i].addr_r, 
+          Packet_array[i].data_r, Packet_array[i].op_r);
+    endfunction      
+                
+endclass
+    
 // define queue, temp structure union, and class.
-stim_u su[$], temp;
-Packet p;
+input_data_type su[$], Stim_st;
+Gen_Packet p;
 
 
 initial begin
 // Generate random fields for num_op operations
-for(int i = num_op; i > 0; i--)begin
 	p = new();  // create a packet
-	p.c.constraint_mode(1);  // turn constraint on
+	
 	assert (p.randomize())
-	else $fatal(0, "Packet::randomize failed");
-	temp.Struct.data = p.data_r;
-	temp.Struct.addr = p.addr_r;
-	temp.Struct.op = p.op_r;
-	su.push_front(temp.bv);
-	$display("op: %h",temp.Struct.op);
-	$display("addr: %h",temp.Struct.addr);
-	$display("data: %h",temp.Struct.data);
+	else $fatal(0, "Gen_Packet::randomize failed");
+	p.print_all();
+	
+	foreach (p.Packet_array[i]) begin
+	   Stim_st.data_wr       = p.Packet_array[i].data_r;
+	   Stim_st.physical_addr = p.Packet_array[i].addr_r;
+	   Stim_st.rw            = p.Packet_array[i].op_r;
+
+ 	   su.push_front(Stim_st);
 	end
+
+	wait (ctrl_intf.rw_proc);
+do
+   @ (posedge act_cmd ) begin
+      data = su.pop_back;
+    end  
+while (su.size != 0);   
 end
+
+always_ff @ (intf.clock_t)
+begin
+    if ((!dev_busy) && (su.size >0 ) && (ctrl_intf.act_idle))
+       act_cmd <= 1'b1;
+    else   
+       act_cmd <= 1'b0;
+
+end
+
 endmodule 
 

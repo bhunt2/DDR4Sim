@@ -35,7 +35,7 @@ logic dev_busy;
                            .ctrl_intf(ctrl_intf),
                            .data_in(data_in),//connect to sim model
                            .act_cmd (act_cmd));     
-   
+  
    BURST_RW burst_rw(.intf(intf),
                     .ctrl_intf(ctrl_intf));
 
@@ -51,10 +51,11 @@ logic dev_busy;
                     .wr_dly(wr_dly),
                     .rd_dly(rd_dly));
     
-  Stimulus  stim(.ctrl_intf(ctrl_intf),
-                 .dev_busy(dev_busy),
-                 .data(data_in),
-                 .act_cmd(act_cmd));
+  Rand_Stimulus  stim(.intf(intf),
+                  .ctrl_intf(ctrl_intf),
+                  .dev_busy(dev_busy),
+                  .data(data_in),
+                  .act_cmd(act_cmd));
                  
   MEMORY_CHECK mem_chk(.intf(intf),
                        .ctrl_intf(ctrl_intf),
