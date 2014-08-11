@@ -45,21 +45,11 @@ wire dm_n, dbi_n, tdqs_t;
 logic PAR;
 wire ODT;
                    
-// Test to see if timing requirements are met for reset to clock enable
-sequence reset_s;
-         $rose(reset_n);
-endsequence
-sequence cke_s;
-         ##[tCKE_L:$] $rose(cke);
-endsequence
-property reset_p;
-         @(posedge clock_t) reset_s |-> cke_s;
-endproperty
-assert property (reset_p);
 
-
-
-
+// Assertions
+import checkerLibrary::*;
+check_reset(posedge clock_t, reset_n, cke);	
+			
 // method for strobe pins
 task set_strobe_pins (input rw_data_type data);
 @(posedge clock_r)
