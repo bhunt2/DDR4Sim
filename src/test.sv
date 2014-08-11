@@ -17,6 +17,7 @@ logic dev_busy, next_cmd, dev_rd;
 
 
    //testing variables
+<<<<<<< HEAD
   DDR_INTERFACE intf();
   DDR_CLOCK ddr_clock (.intf(intf));   
   TB_INTERFACE tb_intf();             
@@ -38,6 +39,31 @@ logic dev_busy, next_cmd, dev_rd;
 
   DIMM_MODEL dimm(.intf(intf),
                   .tb_intf(tb_intf)); 
+=======
+   DDR_INTERFACE intf();
+   CTRL_INTERFACE ctrl_intf();
+   CHECKER C1(.intf(intf),.ctrl_intf(ctrl_intf));
+   DIMM_MODEL dimm(.intf(intf),
+                   .ctrl_intf(ctrl_intf));
+   DDR_CLOCK ddr_clock (.intf(intf));                
+                   
+   DDR_CONTROLLER ddr_ctrl (.intf(intf),
+                            .ctrl_intf(ctrl_intf),
+                            .mrs_update(mrs_update),
+                            .mrs_bl(burst_length),
+                            .dev_busy(dev_busy));
+    BURST_ACT burst_act(.intf( intf),
+                  .ctrl_intf( ctrl_intf),
+                  .act_cmd (act_cmd));
+                  
+    BURST_DATA burst_data (.intf( intf),
+                           .ctrl_intf(ctrl_intf),
+                           .data_in(data_in),//connect to sim model
+                           .act_cmd (act_cmd));     
+  
+   BURST_RW burst_rw(.intf(intf),
+                    .ctrl_intf(ctrl_intf));
+>>>>>>> 9d222b7069cac446ef6e9b7425d8c71816e3f883
 
 //                   .BL(BL),
 //                   .RD_PRE(RD_PRE),

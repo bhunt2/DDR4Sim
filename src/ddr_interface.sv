@@ -28,14 +28,15 @@ logic reset_n;
    
 logic cke, cs_n,act_n;
 logic ras_n_a16, cas_n_a15, we_n_a14;
-logic bc_n_a12, ap_a10;
-logic addr17;
-logic addr13;
-logic addr11;
-logic [9:0] addr9_0;
 logic [BG_WIDTH - 1:0] bg_addr;
 logic [BA_WIDTH - 1:0] ba_addr;
 logic [2:0] C2_0 = CHIP_ID;
+logic bc_n_a12;
+logic addr17;
+logic addr13;
+logic addr11;
+logic ap_a10;
+logic [9:0] addr9_0;
 
 logic [DATA_WIDTH-1:0] dq;
 logic dqs_t = 1'b1;
@@ -47,10 +48,14 @@ logic PAR;
 wire ODT;
                    
 
+<<<<<<< HEAD
 // Assertions
 
 //check_reset(posedge clock_t, reset_n, cke);	
 			
+=======
+
+>>>>>>> 9d222b7069cac446ef6e9b7425d8c71816e3f883
 // method for strobe pins
 task set_strobe_pins (input rw_data_type data);
 @(posedge clock_r)

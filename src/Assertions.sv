@@ -14,7 +14,11 @@
 
 `include "ddr_package.pkg"
 
-module checker(DDR_INTERFACE intf);
+module CHECKER(DDR_INTERFACE intf, CTRL_INTERFACE ctrl_intf);
+
+// Setup necessary variables for use within the module
+
+
 // Activate Commands
 //  Require that CS_n of a specific chip be de-asserted (active low) then ACT_n be
 //  de-asserted to begin the activate process.  This may not be needed and the only
@@ -29,19 +33,49 @@ module checker(DDR_INTERFACE intf);
 //**********************
 //endproperty
 
-// Reset
-//  The reset is active low and asynchronous.  System must return to default state
-//  a reset command is given
-sequence reset_s;
+
+// Reset(pg.17)
+//  A reset involves very specific timing for the reset pin (active low and asynchronous)
+//  and the clocks (CK_t, CK_c) and the clock enable signal (CKE).
+//  Deselect Command is CKE is high over two clock cycles and CS_n is also high.  All other
+//  signals don't matter (X).
+sequence reset_s;							// Check for reset
     $rose(intf.reset_n);
 endsequence
-sequence cke_s;
-    ##[tCKE_L:$] $rose(intf.cke);
+sequence ckeIS_s;							// Check for correct timing for CKE from reset
+    ##[tCKE_L - tIS:$] $rose(intf.cke);
 endsequence
-property reset_p;
-    @(posedge intf.clock_t) reset_s |-> cke_s;
+sequence cke_s;								// Check for setup timing for CKE before next clock
+	##[tIS:$] $rose(intf.clock_t);
+endsequence
+
+// Initialization (pg.17-18)
+//  Initialization requires that reset was accomplished properly and that CKE is held
+//  high for the duration of the initialization sequence.
+//  
+sequence tXPR2MRS;							// Timing for good clock edge after CKE to first MRS write
+	##[tXPR:$] $rose(ctrl_intf.mrs_rdy);
+endsequence
+sequence tMRD2MRS;							// Timing for rest of MRS writes
+	##[tMRD:$] $rose(ctrl_intf.mrs_rdy);
+endsequence
+sequence tMOD2ZQCL;							// Timing for last MRS to ZQCL
+	##[tMOD:$] $rose(ctrl_intf.zqcl_rdy);
+endsequence
+sequence tZQ2Valid;							// Timing required from ZQCL to valid operation
+	##[tZQ:$] $rose(ctrl_intf.config_done);
+endsequence
+sequence all_init_sequences;
+	cke_s ##0 tXPR2MRS ##0 tMRD2MRS[*6] ##0 tMOD2ZQCL ##0 tZQ2Valid;
+endsequence
+sequence cke_throughout_s;					// Sequence that implements all the initialized checks
+	(intf.cke) throughout (all_init_sequences); 
+endsequence
+property reset_p;							// Implement sequences in a property for use
+    @(posedge intf.clock_t) reset_s |-> ckeIS_s |-> cke_throughout_s;
 endproperty
 reset_a: assert property (reset_p);
+
 
 // Data Strobe
 //  This is the signal that transmits data.  It is an inout signal because it is an
@@ -50,6 +84,7 @@ reset_a: assert property (reset_p);
 //property DataStrobe
 //	*************
 //endproperty
+
 
 // Termination Data Strobe
 //  This is applicable to x8 DRAMs only.  When enabled in Mode Register A11 = 1
@@ -66,13 +101,14 @@ reset_a: assert property (reset_p);
 //		MR1A11 == 0;
 //endproperty
 
+
 // Write Recovery and Read to Precharge (cycles)
 //  Can be set in MR0 A11, A10, and A9.  The table for these settings are on
 //  page 14 of the JEDEC Guide.
 //  ** Is this going to be utilized? **
 //property
-	
 //endproperty
+
 
 // CAS Latency Setting
 //  CAS Latency can be set for a particular DDR4 DIMM architecture in MR0 by
@@ -83,6 +119,7 @@ reset_a: assert property (reset_p);
 	
 //endproperty
 
+
 // CAS Write Latency Setting
 //  CAS Write Latency can be set in MR2 A3-5.  The table for the settings are
 //  found on page 16 of the JEDEC Guide.
@@ -90,6 +127,7 @@ reset_a: assert property (reset_p);
 //property
 
 //endproperty
+
 
 // CAL CS to CMD/ADDR Latency Setting
 //  Can be set in MR4 A6-8.  The table for the settings are found on page 20
@@ -104,7 +142,9 @@ reset_a: assert property (reset_p);
 //  follows required timing and settings.  Command Truth Table is found on
 //  page 24 (Table 16).
 
-// ** Are the CKE Settings going tob be used from Table 17 - CKE Truth Table? **
+
+// ** Are the CKE Settings going to be used from Table 17 - CKE Truth Table? **
+
 
 // Burst Length, Type, and Order
 //  The burst settings can be set in A3 of MR0.  The ordering of accesses within
@@ -113,13 +153,12 @@ reset_a: assert property (reset_p);
 //  ** Is this going to be implemented or will it be static? **
 //    This is the only mode register bit that will change in our simulation
 //property
-	
 //endproperty
+
 
 // Write Leveling
 //  The settings for Write Leveling can be found in section 4.7.
-//  ** Is this being implemented? **
-//     This is not implemented
+//     ** This is not implemented **
 
 // Refresh
 //  4.9
@@ -145,16 +184,31 @@ reset_a: assert property (reset_p);
 //  tCCD_L (long) corresponds to consecutive reads from the same Bank Group
 //   - Requires 6 clock cycles from read to read
 
-
-// Active to Active tRRD Timing
+// Activate to Activate tRRD Timing
 //  Timing diagram found in Section 4.19, Figure 57
 //  tRRD_S (short) corresponds to consecutive ACTIVATE commands to different Bank Group
 //   - Requires 4 clock cycles from ACTIVATE to ACTIVATE
 //  tRRD_L (long) corresponds to consecutive ACTIVATE commands to different Banks
 //  of the same Bank Group
 //   - Requires 6 clock cycles from ACTIVATE to ACTIVATE
+sequence Activate_s;
+	(cke) throughout ($fell(cs_n) and $fell(act_n));
+endsequence
+sequence Act2Act_s;
+	##[ACT_DELAY:$] ($fell(cs_n) and $fell(act_n));
+endseqeunce
+sequence Act2Read_s;
+	##[CAS_DELAY:$] ($rose(act_n)
 
-
+property AccessTiming_p;
+	@(posedge intf.clock_n) Activate_s -> (Act2Act_s or 
+endproperty
+Access_a: asssert property (AccessTiming_p)
+	
+	property reset_p;							// Implement sequences in a property for use
+    @(posedge intf.clock_t) reset_s |-> ckeIS_s |-> cke_throughout_s;
+endproperty
+reset_a: assert property (reset_p);
 // Four Activate Window
 //  This is the timing requirement between four consecutive activate ACTIVATE commands.
 //  The timing diagram can be found in Section 4.19, Figure 58 and more specific
@@ -162,4 +216,4 @@ reset_a: assert property (reset_p);
 //   This was ignored in our implementation
 
 
-endpackage
+endmodule
