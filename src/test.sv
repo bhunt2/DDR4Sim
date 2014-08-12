@@ -19,6 +19,7 @@ logic test;
 
    //testing variables
   DDR_INTERFACE intf();
+  CHECKER c1(.intf(intf));
   DDR_CLOCK ddr_clock (.intf(intf));   
   TB_INTERFACE tb_intf();             
     

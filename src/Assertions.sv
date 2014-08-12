@@ -14,7 +14,7 @@
 
 `include "ddr_package.pkg"
 
-module CHECKER(DDR_INTERFACE intf, CTRL_INTERFACE ctrl_intf);
+module CHECKER(DDR_INTERFACE intf);
 
 // Setup necessary variables for use within the module
 
@@ -26,6 +26,7 @@ module CHECKER(DDR_INTERFACE intf, CTRL_INTERFACE ctrl_intf);
 //property Activate
 //	CS_n |-> ACT_n;
 //endproperty
+
 
 // Input data mask
 //  ** This does not need implementing **
@@ -43,38 +44,64 @@ sequence reset_s;							// Check for reset
     $rose(intf.reset_n);
 endsequence
 sequence ckeIS_s;							// Check for correct timing for CKE from reset
-    ##[tCKE_L - tIS:$] $rose(intf.cke);
+    reset_s ##[tCKE_L - tIS:$] $rose(intf.cke);
 endsequence
 sequence cke_s;								// Check for setup timing for CKE before next clock
-	##[tIS:$] $rose(intf.clock_t);
+	(intf.cke) throughout (##[tIS:$] $rose(intf.clock_t));
 endsequence
+property reset_p;							// Implement sequences in a property for use
+    @(posedge intf.clock_t) ckeIS_s |-> cke_s;
+endproperty
+reset_a: assert property (reset_p);
 
 // Initialization (pg.17-18)
 //  Initialization requires that reset was accomplished properly and that CKE is held
 //  high for the duration of the initialization sequence.
-//  
-sequence tXPR2MRS;							// Timing for good clock edge after CKE to first MRS write
-	##[tXPR:$] $rose(ctrl_intf.mrs_rdy);
+// 
+/*logic Cmd = {intf.cs_n,intf.act_n,intf.ras_n_a16,intf.cas_n_a15,intf.we_n_a14};
+localparam 	MRS = 5'b01000,
+			REF	= 5'b01001,
+			PRE = 5'b01010,
+			ACT = 5'b00XXX,  // X is any possible combintation of 1's and 0's. This is RA.
+			WR	= 5'b01100,
+			RD	= 5'b01101,
+			NOP	= 5'b01111,
+			DES = 5'b1XXXX,  // X must be X in this case
+			ZQCL= 5'b01110;
+*/
+sequence MRS;
+			$fell(intf.cs_n) and $stable(intf.act_n) and $fell(intf.ras_n_a16) and $fell(intf.cas_n_a15) and $fell(intf.we_n_a14);
 endsequence
-sequence tMRD2MRS;							// Timing for rest of MRS writes
-	##[tMRD:$] $rose(ctrl_intf.mrs_rdy);
+sequence cke_rose;
+	$rose(intf.cke);
+endsequence
+sequence tXPR2MRS;							// Timing for good clock edge after CKE to first MRS write
+	##[tXPR:$] MRS;
+endsequence
+property test_p;
+	@(posedge intf.clock_t) cke_rose |-> tXPR2MRS;
+endproperty
+test_a: assert property (test_p);
+
+/*sequence tMRD2MRS;							// Timing for rest of MRS writes
+	##[tMRD:$] ($fell(intf.cs_n) and $stable(intf.act_n) and $fell(intf.cs_n) and $fell(intf.ras_n_a16) and $fell(intf.cas_n_a15) and $fell(intf.we_n_a14));
 endsequence
 sequence tMOD2ZQCL;							// Timing for last MRS to ZQCL
-	##[tMOD:$] $rose(ctrl_intf.zqcl_rdy);
+	##[tMOD + 100:$] ($fell(intf.cs_n) and $stable(intf.act_n) and $stable(intf.ras_n_a16) and $stable(intf.cas_n_a15) and $fell(intf.we_n_a14));
 endsequence
 sequence tZQ2Valid;							// Timing required from ZQCL to valid operation
-	##[tZQ:$] $rose(ctrl_intf.config_done);
+	##[tZQ:$] (($fell(intf.cs_n) and $stable(intf.act_n) and $fell(intf.ras_n_a16) and $fell(intf.cas_n_a15) and $stable(intf.we_n_a14)) or 	// REF
+			  ($fell(intf.cs_n) and $stable(intf.act_n) and $fell(intf.ras_n_a16) and $stable(intf.cas_n_a15) and $stable(intf.we_n_a14)) or // PRE
+			  ($fell(intf.cs_n) and $stable(intf.act_n) and $stable(intf.ras_n_a16) and $fell(intf.cas_n_a15) and $fell(intf.we_n_a14)) or	// WR
+			  ($fell(intf.cs_n) and $stable(intf.act_n) and $stable(intf.ras_n_a16) and $fell(intf.cas_n_a15) and $stable(intf.we_n_a14)));	// RD
 endsequence
 sequence all_init_sequences;
-	cke_s ##0 tXPR2MRS ##0 tMRD2MRS[*6] ##0 tMOD2ZQCL ##0 tZQ2Valid;
+	cke_s ##1 tXPR2MRS ##1 tMRD2MRS[*6] ##1 tMOD2ZQCL ##1 tZQ2Valid;
 endsequence
 sequence cke_throughout_s;					// Sequence that implements all the initialized checks
 	(intf.cke) throughout (all_init_sequences); 
 endsequence
-property reset_p;							// Implement sequences in a property for use
-    @(posedge intf.clock_t) reset_s |-> ckeIS_s |-> cke_throughout_s;
-endproperty
-reset_a: assert property (reset_p);
+*/
 
 
 // Data Strobe
@@ -184,6 +211,7 @@ reset_a: assert property (reset_p);
 //  tCCD_L (long) corresponds to consecutive reads from the same Bank Group
 //   - Requires 6 clock cycles from read to read
 
+
 // Activate to Activate tRRD Timing
 //  Timing diagram found in Section 4.19, Figure 57
 //  tRRD_S (short) corresponds to consecutive ACTIVATE commands to different Bank Group
@@ -191,24 +219,27 @@ reset_a: assert property (reset_p);
 //  tRRD_L (long) corresponds to consecutive ACTIVATE commands to different Banks
 //  of the same Bank Group
 //   - Requires 6 clock cycles from ACTIVATE to ACTIVATE
+
+/*
 sequence Activate_s;
-	(cke) throughout ($fell(cs_n) and $fell(act_n));
+	$fell(intf.cs_n) and $fell(intf.act_n);
 endsequence
 sequence Act2Act_s;
-	##[ACT_DELAY:$] ($fell(cs_n) and $fell(act_n));
-endseqeunce
-sequence Act2Read_s;
+	Activate_s ##[ACT_DELAY:$] Activate_s;
+endsequence
+/*sequence Act2Read_s;
 	##[CAS_DELAY:$] ($rose(act_n)
-
+endsequence
+sequence AllCmds_s;
+	(intf.cke) throughout (Act2Act_s);
+endsequence
 property AccessTiming_p;
-	@(posedge intf.clock_n) Activate_s -> (Act2Act_s or 
+	@(posedge intf.clock_n) AllCmds_s; 
 endproperty
-Access_a: asssert property (AccessTiming_p)
-	
-	property reset_p;							// Implement sequences in a property for use
-    @(posedge intf.clock_t) reset_s |-> ckeIS_s |-> cke_throughout_s;
-endproperty
-reset_a: assert property (reset_p);
+Access_a: assert property (AccessTiming_p);
+*/
+
+
 // Four Activate Window
 //  This is the timing requirement between four consecutive activate ACTIVATE commands.
 //  The timing diagram can be found in Section 4.19, Figure 58 and more specific

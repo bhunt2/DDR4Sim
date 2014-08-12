@@ -45,8 +45,8 @@ package ddr_pkg;
    parameter tWTR     = 7.5/nCK;
    parameter tWR      = 15/nCK;
    parameter tRP      = 12.5/nCK;
-   parameter ACT_DELAY = 7.5/nCK;         //act to act cmds latency
-   parameter CAS_DELAY = 12.5/nCK;        //act to cas cmd latency
+   parameter ACT_DELAY = int'(7.5/nCK);         //act to act cmds latency
+   parameter CAS_DELAY = int'(12.5/nCK);        //act to cas cmd latency
 
    //timming parameter for reset
    //parameter tCKE_L   = 500000/nCK;
