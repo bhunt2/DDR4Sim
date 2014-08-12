@@ -6,24 +6,25 @@ timeunit 10ps;
 timeprecision 1ps;
 
 
-input_data_type data_in;
-logic act_cmd;
-int BL, RD_PRE;
+//input_data_type data_in;
+//logic act_cmd;
+//int BL, RD_PRE;
 logic mrs_update, w_pre, r_pre;
 logic [1:0] burst_length,al_dly;
 int cas_dly, wr_dly, rd_dly;
-logic [1:0] dev_rw;
-logic dev_busy, next_cmd, dev_rd;
+//logic [1:0] dev_rw;
+//logic dev_busy, next_cmd, dev_rd;
+logic test;
 
 
    //testing variables
-<<<<<<< HEAD
   DDR_INTERFACE intf();
   DDR_CLOCK ddr_clock (.intf(intf));   
   TB_INTERFACE tb_intf();             
     
   Rand_Stimulus  stim(.intf(intf),
-                      .tb_intf(tb_intf)); 
+                      .tb_intf(tb_intf),
+                      .test(test)); 
  //                 .next_cmd(next_cmd),
  //                 .dev_busy(dev_busy),
  //                 .data(data_in),
@@ -38,32 +39,7 @@ logic dev_busy, next_cmd, dev_rd;
 //                       .act_cmd(act_cmd));
 
   DIMM_MODEL dimm(.intf(intf),
-                  .tb_intf(tb_intf)); 
-=======
-   DDR_INTERFACE intf();
-   CTRL_INTERFACE ctrl_intf();
-   CHECKER C1(.intf(intf),.ctrl_intf(ctrl_intf));
-   DIMM_MODEL dimm(.intf(intf),
-                   .ctrl_intf(ctrl_intf));
-   DDR_CLOCK ddr_clock (.intf(intf));                
-                   
-   DDR_CONTROLLER ddr_ctrl (.intf(intf),
-                            .ctrl_intf(ctrl_intf),
-                            .mrs_update(mrs_update),
-                            .mrs_bl(burst_length),
-                            .dev_busy(dev_busy));
-    BURST_ACT burst_act(.intf( intf),
-                  .ctrl_intf( ctrl_intf),
-                  .act_cmd (act_cmd));
-                  
-    BURST_DATA burst_data (.intf( intf),
-                           .ctrl_intf(ctrl_intf),
-                           .data_in(data_in),//connect to sim model
-                           .act_cmd (act_cmd));     
-  
-   BURST_RW burst_rw(.intf(intf),
-                    .ctrl_intf(ctrl_intf));
->>>>>>> 9d222b7069cac446ef6e9b7425d8c71816e3f883
+                  .tb_intf(tb_intf));
 
 //                   .BL(BL),
 //                   .RD_PRE(RD_PRE),
@@ -71,7 +47,8 @@ logic dev_busy, next_cmd, dev_rd;
 //                   .dev_rw(dev_rw));
 
   DDR_TOP ddr_top (.intf(intf),
-                   .tb_intf(tb_intf)); 
+                   .tb_intf(tb_intf),
+                   .test(test),
 //                    .data_in(data_in),
 //                    .act_cmd(act_cmd),
                     .mrs_update(mrs_update),
@@ -81,7 +58,7 @@ logic dev_busy, next_cmd, dev_rd;
                     .al_dly(al_dly),
                     .cas_dly(cas_dly),
                     .wr_dly(wr_dly),
-                    .rd_dly(rd_dly),
+                    .rd_dly(rd_dly)
 //                    .BL(BL),
 //                    .RD_PRE(RD_PRE),
 //                    .dev_rd(dev_rd),
@@ -98,7 +75,7 @@ begin
   intf.reset_n <= 'X;
   w_pre   <= 1'b1;
   r_pre   <= 1'b1;
-  burst_length <= 2'b10;
+  burst_length <= 2'b00;
   al_dly   <= 0;
   cas_dly  <= 4;
   wr_dly   <= 10;

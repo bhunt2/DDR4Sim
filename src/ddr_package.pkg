@@ -70,7 +70,7 @@ package ddr_pkg;
   
    //typedef for states in BURST_ACT
    typedef enum {ACT_IDLE, ACT_WAIT_STATE, ACT_CMD, ACT_CAS, ACT_ONE_DELAY,
-                 PRE_WAIT_DATA, PRE_WAIT_STATE,
+                 ACT_TWO_DELAY,PRE_WAIT_DATA, PRE_WAIT_STATE,
                  PRE_CMD, PRE_IDLE} act_fsm_type;
    
    //typedef for states in BURST_CAS

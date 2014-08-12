@@ -23,7 +23,7 @@ timeprecision 1ps;
 
 
 logic clock_n, clock_t;
-logic clock_w,clock_r;   //create data strobe signals
+logic clock_r;   //create data strobe signals
 logic reset_n;
    
 logic cke, cs_n,act_n;
@@ -48,14 +48,10 @@ logic PAR;
 wire ODT;
                    
 
-<<<<<<< HEAD
 // Assertions
 
 //check_reset(posedge clock_t, reset_n, cke);	
 			
-=======
-
->>>>>>> 9d222b7069cac446ef6e9b7425d8c71816e3f883
 // method for strobe pins
 task set_strobe_pins (input rw_data_type data);
 @(posedge clock_r)

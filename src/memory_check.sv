@@ -55,11 +55,11 @@ begin
        rd_addr_stored.delete;
     
     if  (act_cmd_d) begin
-       if (tb_intf.data.rw == WRITE) begin
-           index   = tb_intf.data.physical_addr[31:3];
-           write_mem[index] = tb_intf.data.data_wr;
+       if (tb_intf.data_in.rw == WRITE) begin
+           index   = tb_intf.data_in.physical_addr[31:3];
+           write_mem[index] = tb_intf.data_in.data_wr;
        end else  //store the read address
-           rd_addr_stored = {rd_addr_stored,tb_intf.data.physical_addr [31:3]};
+           rd_addr_stored = {rd_addr_stored,tb_intf.data_in.physical_addr [31:3]};
     end
     
     if (rd_end)
@@ -74,13 +74,13 @@ begin
    if (rd_end_d) begin
      data_wr = write_mem[raddr];     
      if (tb_intf.BL == 8) begin
-        data_rd = {data_t[4], data_c[3], data_t[3], data_c[2], 
-                   data_t[2], data_c[1], data_t[1], data_c[0]};     
+        data_rd = {data_t[4], data_c[4], data_t[3], data_c[3], 
+                   data_t[2], data_c[2], data_t[1], data_c[1]};     
         if (data_wr == data_rd)             
            RESULT = "PASS";
         else 
            RESULT = "FAIL";   
-        data_check_8: assert (data_wr[31:0] == data_rd);
+        data_check_8: assert (data_wr == data_rd);
         $fwrite(file, "%t  Addr: 0x%h  Wr_Data: 0x%h   Rd_Data:0x%h  Result:%s\n", 
                $stime, raddr,  data_wr, data_rd, RESULT);
      end      
@@ -99,7 +99,7 @@ end
     
 always_ff @ (intf.clock_t)
 begin
-   act_cmd_d       <= tb_intf.act_cmd;
+   act_cmd_d      <= tb_intf.act_cmd;
    rd_end_d       <= rd_end;
    cycle_8_d      <= cycle_8[4];
    cycle_4_d      <= cycle_4[2];

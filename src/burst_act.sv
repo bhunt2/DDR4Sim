@@ -90,21 +90,31 @@ begin
                act_next_state <= PRE_WAIT_DATA;
             else if ((act_counter == ACT_DELAY) && (!hit) && (!miss))
             begin
-               if (ctrl_intf.cas_rdy == 1'b0) begin
+               if (ctrl_intf.cas_rdy == 1'b1) begin //delay to avoid assert
+                                                    // both CAS and ACT in one cycle 
+                  act_next_state <= ACT_ONE_DELAY;  
+                  ctrl_intf.act_rdy = 1'b0;
+               end else begin          
                   act_next_state    <= ACT_CMD;
                   ctrl_intf.act_rdy <= 1'b1;
-                  ctrl_intf.act_rw  <= ctrl_intf.rw;
-               end else   //delay to avoid assert both CAS and ACT in one cycle         
-                  act_next_state <= ACT_ONE_DELAY;  
+                  ctrl_intf.act_rw  <= ctrl_intf.rw;                  
+               end   
             end
       end             
          
       ACT_ONE_DELAY: begin
-         act_next_state    <= ACT_CMD;
-         ctrl_intf.act_rdy <= 1'b1;
-         ctrl_intf.act_rw  <= ctrl_intf.rw;
+         
+            act_next_state    <= ACT_TWO_DELAY;
+//            ctrl_intf.act_rdy <= 1'b1;
+//            ctrl_intf.act_rw  <= ctrl_intf.rw;
       end
-            
+   
+      ACT_TWO_DELAY: begin
+         
+            act_next_state    <= ACT_CMD;
+            ctrl_intf.act_rdy <= 1'b1;
+            ctrl_intf.act_rw  <= ctrl_intf.rw;
+      end            
       ACT_CMD: begin
          clear_act_counter <= 1'b1; 
          ctrl_intf.act_rdy <= 1'b0; 

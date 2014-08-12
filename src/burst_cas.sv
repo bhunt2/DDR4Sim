@@ -106,8 +106,8 @@ begin
                            .extra_count(extra_count));
                 prev_rq           <= request;           
                 if (rtw == 1'b1) 
-                   cas_next_state <= CAS_WAIT_EXTRA;           
-                else            
+                   //cas_next_state <= CAS_WAIT_EXTRA;           
+                //else            
                    cas_next_state <= CAS_WAIT_DATA;
                 end
             end
@@ -167,12 +167,17 @@ begin
       request   = ctrl_intf.act_rw;
    end 
    else if ((cas_state == CAS_CMD) && (next_cas)) begin
-      temp = act_cmd_trk.pop_front;
-      if (temp < CAS_DELAY + 1)
-         cas_delay = CAS_DELAY - temp -1;
-      else   
+//      temp = act_cmd_trk.pop_front;
+//      if ( (CAS_DELAY - temp - 1 ) < ctrl_intf.tCCD) 
+//         cas_delay = CAS_DELAY - temp -1;
+//      else   
+//         cas_delay = ctrl_intf.tCCD;
+      temp = (CAS_DELAY - act_cmd_trk.pop_front - 1);
+      if (temp > ctrl_intf.tCCD)
+         cas_delay = temp;
+      else
          cas_delay = ctrl_intf.tCCD;
-      
+            
       request   = act_rw_trk.pop_front;
       
       //update the queue for update # cycles each cmd waited.               

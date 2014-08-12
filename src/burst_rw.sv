@@ -35,7 +35,7 @@ int rw_counter,rw_delay;
 int rw_cmd_trk[$];  //tracking number of cycles each rw command waiting
 logic [1:0] rw_trk[$];
    
-   
+int temp;   
    
 //fsm control timing between CAS and data 
 always_ff @(posedge intf.clock_t, negedge intf.reset_n)
@@ -103,7 +103,7 @@ end
 // keep track when CAS occurs 
 always @(intf.reset_n, ctrl_intf.cas_rdy, next_rw)//, rw_state)
 begin
-   int temp;
+//   int temp;
    if (!intf.reset_n) begin
       rw_cmd_trk.delete();    //delete the queues
       rw_delay  = 0;
@@ -120,16 +120,19 @@ begin
       rw_delay = DELAY - 1;
    end   
    else if ((rw_state == RW_DATA) && (next_rw)) begin
-           temp = rw_cmd_trk.pop_front;
+           
            
            if (rw_trk.pop_front === READ)
               DELAY = ctrl_intf.RD_DELAY;
            else
-              DELAY = ctrl_intf.WR_DELAY;         
-           if (DELAY > (temp + 1))    
-                rw_delay = DELAY - rw_cmd_trk.pop_front -1;
+              DELAY = ctrl_intf.WR_DELAY;   
+          // temp = rw_cmd_trk.pop_front;         
+          //if (DELAY > (temp + 1))    
+           temp = DELAY - rw_cmd_trk.pop_front -1;
+           if (temp > DELAY)
+                rw_delay = temp;
             else
-                rw_delay = 2;         // enough for the preamble 
+                rw_delay = DELAY + ctrl_intf.BL/2;         // enough for the preamble 
       
            //update # cycles each RW cmd waited
            foreach (rw_cmd_trk[i]) 
@@ -137,7 +140,8 @@ begin
    end
    
    if ((ctrl_intf.cas_rdy) &&
-       (rw_state != RW_IDLE) && (rw_state != RW_DATA)) begin
+        ((rw_state != RW_IDLE) &&
+        ((rw_state != RW_DATA) && (rw_next_state != RW_IDLE)))) begin
       rw_cmd_trk = {rw_cmd_trk, (rw_delay - rw_counter)};
       rw_trk     = {rw_trk, ctrl_intf.cas_rw}; 
    end                

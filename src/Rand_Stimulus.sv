@@ -5,15 +5,15 @@
 
 `include "ddr_package.pkg"
 module Rand_Stimulus( DDR_INTERFACE intf,
-                      TB_INTEFACE tb_intf);
+                      TB_INTERFACE tb_intf,
+                      input logic test);
 //                input logic dev_busy,next_cmd,
 //                output input_data_type data,
 //                output logic act_cmd);
 
 
 // Set number of operations to be stored in the queue
-parameter num_op = 30;
-
+parameter num_op = 100;
 
 // Use class for randomization
 class Packet;
@@ -82,10 +82,10 @@ initial begin
  	   su.push_front(Stim_st);
 	end
 
-	wait (!tb_intf.dev_busy);
+	wait (test);
 do
    @ (posedge tb_intf.act_cmd ) begin
-      tb_intf.data = su.pop_back;
+      tb_intf.data_in = su.pop_back;
     end  
 while (su.size != 0);   
 end

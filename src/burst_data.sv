@@ -18,15 +18,17 @@
  
 module BURST_DATA (DDR_INTERFACE intf,
                    CTRL_INTERFACE ctrl_intf,
-                   input input_data_type data_in,//connect to sim model
-                   input logic act_cmd           //connect to sim model
+                   TB_INTERFACE tb_intf);
+//                   input input_data_type data_in,//connect to sim model
+//                   input logic act_cmd           //connect to sim model
                    //input mode_register_type mode_reg, pre_reg, mrs_update_cmd,                  
                    //input logic [1:0] rw,
                    //input logic mrs_rdy, act_rdy,cas_rdy,rw_rdy,mrs_update_rdy, 
                    //input logic pre_rdy, des_rdy,zqcl_rdy,refresh_rdy,
                    //output mem_addr_type mem_addr_out, //connect to ACT module
                    //output int RD_DELAY, WR_DELAY,BL, CL,CWL 
-                  );
+
+//               );
 
    //use the mapping table in hw 2 - and assume bit 28th as channel addr
    int map_array [] = '{3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,
@@ -75,9 +77,9 @@ begin
          cmd_out.cmd_data.addr      = mem_addr;
         
          cas_in.addr     = mem_addr;
-         cas_in.rw       = data_in.rw;
-         rw_in.data_wr   = data_in.data_wr; 
-         rw_in.rw        = data_in.rw;
+         cas_in.rw       = tb_intf.data_in.rw;
+         rw_in.data_wr   = tb_intf.data_in.data_wr; 
+         rw_in.rw        = tb_intf.data_in.rw;
          rw_in.preamble  = WPRE;
          rw_in.burst_length = ctrl_intf.BL;
         
@@ -113,7 +115,7 @@ begin
          
       if (ctrl_intf.pre_rdy) begin  
          cmd_out.cmd           = PRE;
-         cmd_out.cmd_data.addr = {ctrl_intf.mode_reg, 10'b1};
+         cmd_out.cmd_data.addr = {ctrl_intf.pre_reg, 10'b1};
       end
          
       if (ctrl_intf.refresh_rdy) begin
@@ -208,18 +210,19 @@ end
    
 always_ff @(intf.clock_t)
 begin
-   act_cmd_d <= act_cmd;
+   act_cmd_d <= tb_intf.act_cmd;
    
 end
 
-always @ (act_cmd)
+//always @ (tb_intf.act_cmd)
+always @ (act_cmd_d)
 begin
    if (act_cmd_d) begin
-      map_addr (.addr(data_in.physical_addr), 
+      map_addr (.addr(tb_intf.data_in.physical_addr), 
                 .idx_array(map_array),
                 .mem_addr(mem_addr));
       ctrl_intf.mem_addr     = mem_addr;  
-      ctrl_intf.rw           = data_in.rw;  
+      ctrl_intf.rw           = tb_intf.data_in.rw;  
    end       
 end                
    
