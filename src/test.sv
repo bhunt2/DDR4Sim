@@ -19,12 +19,7 @@ timeprecision 1ps;
 
   //testing variables
   DDR_INTERFACE intf();
-<<<<<<< HEAD
   CHECKER c1(.intf(intf));
-  DDR_CLOCK ddr_clock (.intf(intf));   
-=======
-  
->>>>>>> c76fe0c431b3a5d1adf1e68df0e276b917e18b15
   TB_INTERFACE tb_intf();             
   DDR_CLOCK ddr_clock (.intf(intf));   
 
