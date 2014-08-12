@@ -75,14 +75,14 @@ always_comb begin
 			ACT_WAIT_STATE: begin  
 				clear_act_counter  	<= 1'b0;  
 				ctrl_intf.act_idle 	<= 1'b0;
-				if ((act_counter === ACT_DELAY) && (hit)) begin  
+				if ((act_counter == ACT_DELAY) && (hit)) begin  
 					act_next_state   	<= ACT_CAS;  
 					ctrl_intf.act_rdy 	<= 1'b1;
 					ctrl_intf.act_rw  	<= ctrl_intf.rw;
 				end
-				else if ((act_counter === ACT_DELAY) && (miss))
+				else if ((act_counter == ACT_DELAY) && (miss))
 					act_next_state 	<= PRE_WAIT_DATA;
-				else if ((act_counter === ACT_DELAY) && (!hit) && (!miss)) begin
+				else if ((act_counter == ACT_DELAY) && (!hit) && (!miss)) begin
 					if (ctrl_intf.cas_rdy === 1'b0) begin
 						act_next_state    <= ACT_CMD;
 						ctrl_intf.act_rdy <= 1'b1;

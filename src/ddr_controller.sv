@@ -94,7 +94,7 @@ always_comb begin
            
    CTRL_REFRESH: begin
 		if (refresh_done) begin
-			trl_next_state   			<= CTRL_RW;
+			ctrl_next_state   			<= CTRL_RW;
 			ctrl_intf.rw_proc 			<= 1'b1;
 		end   
     end
@@ -111,21 +111,20 @@ end
 			refresh_almost       		<= 1'b0;
 			ctrl_intf.refresh_rdy		<= 1'b0;
 			refresh_done         		<= 1'b0;
-			end
+		end
 		else begin
 			refresh_counter 			<= refresh_counter + 1;
-			if (refresh_counter === tREF - 100) 
+			if (refresh_counter == tREF - 100) 
 				refresh_almost 			<= 1'b1;
-			else if (refresh_counter === tREF) begin
+			else if (refresh_counter == tREF) begin
 				refresh_almost 			<= 1'b0;
 				ctrl_intf.refresh_rdy 	<= 1'b1;
 			end   
-			else if (refresh_counter === tREF + 1)
+			else if (refresh_counter == tREF + 1)
 				ctrl_intf.refresh_rdy 	<= 1'b0;   
-			else if (refresh_counter === tREF + tRC)
+			else if (refresh_counter == tREF + tRC)
 				refresh_done    		<= 1'b1;
-			end        
-		end
+		end        
 	end		
       
     // simple act_counter 
