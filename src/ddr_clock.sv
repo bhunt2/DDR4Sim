@@ -18,6 +18,7 @@ module DDR_CLOCK(DDR_INTERFACE intf);
 timeunit 10ps;
 timeprecision 1ps;
 
+
 initial
 begin 
    intf.clock_n = FALSE;

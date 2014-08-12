@@ -39,7 +39,7 @@ package ddr_pkg;
    parameter WRITE    = 2'b10;
    
    //timing parameter
-
+   
    parameter nCK      = 1.25;
    parameter tRTP     = 7.5/nCK;
    parameter tWTR     = 7.5/nCK;

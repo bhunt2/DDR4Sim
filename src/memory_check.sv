@@ -16,10 +16,6 @@
 
 module MEMORY_CHECK (DDR_INTERFACE intf,
                      TB_INTERFACE tb_intf);
-//                     input int BL,
-//                     input logic [1:0] dev_rw,
-//                     input input_data_type data,
-//                     input logic act_cmd);
 
 
 data_type       write_mem [dimm_addr_type];

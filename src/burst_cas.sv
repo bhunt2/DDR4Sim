@@ -19,14 +19,7 @@
 
 //note: use clock_t as main clock
 module BURST_CAS (DDR_INTERFACE intf,
-                  CTRL_INTERFACE ctrl_intf
-                  );
-                 //input logic rw_done,                    // complete data transaction
-                 //input logic act_rdy, [1:0] act_request, // R/W request from act
-                 //input int CAS_DELAY,CL,CWL,BL,          //from data module
-                 //output logic cas_rdy, cas_idle,
-                 //output logic [1:0] rw);
-
+                  CTRL_INTERFACE ctrl_intf);
   
 cas_fsm_type cas_state, cas_next_state;
 logic next_cas = 1'b0;

@@ -15,11 +15,6 @@
 
 module DIMM_MODEL (DDR_INTERFACE intf,
                    TB_INTERFACE tb_intf);
-//                   input int BL, RD_PRE,
-//                   input logic dev_rd, 
-//                   input logic [1:0] dev_rw);
-
-
 
 parameter MRS_C = 5'b01000;
 parameter REF_C = 5'b01001;

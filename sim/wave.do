@@ -71,8 +71,12 @@ add wave -noupdate /top/mem_chk/act_cmd_d
 add wave -noupdate -expand /top/tb_intf/data_in
 add wave -noupdate /top/mem_chk/raddr
 add wave -noupdate /top/mem_chk/index
+add wave -noupdate /top/ddr_top/ctrl_intf/CWL
+add wave -noupdate /top/ddr_top/ctrl_intf/CL
+add wave -noupdate /top/ddr_top/ctrl_intf/mrs_rdy
+add wave -noupdate /top/ddr_top/ctrl_intf/mode_reg
 TreeUpdate [SetDefaultTree]
-WaveRestoreCursors {{Cursor 1} {465418 ps} 0} {{Cursor 2} {463656 ps} 0}
+WaveRestoreCursors {{Cursor 1} {465418 ps} 0} {{Cursor 2} {305208 ps} 0}
 quietly wave cursor active 2
 configure wave -namecolwidth 198
 configure wave -valuecolwidth 100
@@ -88,4 +92,4 @@ configure wave -griddelta 40
 configure wave -timeline 0
 configure wave -timelineunits ms
 update
-WaveRestoreZoom {463080 ps} {464232 ps}
+WaveRestoreZoom {304735 ps} {306377 ps}
