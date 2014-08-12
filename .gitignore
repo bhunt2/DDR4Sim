@@ -3,5 +3,3 @@ sim/DDR4.*
 sim/vsim.wlf
 sim/modelsim.*
 sim/output.txt
-sim/work/_info
-sim/work/_lib.qdb
