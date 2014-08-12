@@ -16,23 +16,20 @@
 
 module MEMORY_CHECK (DDR_INTERFACE intf,
                      TB_INTERFACE tb_intf);
-//                     input int BL,
-//                     input logic [1:0] dev_rw,
-//                     input input_data_type data,
-//                     input logic act_cmd);
 
 
 data_type       write_mem [dimm_addr_type];
 logic [4:0][7:0] data_c,data_t;
 dimm_addr_type  rd_addr_stored[$];
 dimm_addr_type  raddr;
+dimm_addr_type raddr_prev = '1;
 bit             rd_end, rd_end_d;
 bit [4:0]cycle_8 = 5'b10000;
 bit [2:0]cycle_4 = 5'b100;
 bit cycle_8_d    = 1'b1;
 bit cycle_4_d    = 1'b1;
 bit act_cmd_d    = 1'b0;
-
+bit [28:0] index;
 data_type data_wr, data_rd;
 int file;
 
@@ -48,20 +45,22 @@ begin
    	$display("Error: Can not open the file."); 
 end
 
-always @ (act_cmd_d, rd_end, intf.reset_n)
+always @ (act_cmd_d, intf.reset_n)
 begin
     bit [28:0] index;
     if (!intf.reset_n)
        rd_addr_stored.delete;
     
-    if  (act_cmd_d) begin
+    if  (act_cmd_d == 1'b1) begin
        if (tb_intf.data_in.rw == WRITE) begin
            index   = tb_intf.data_in.physical_addr[31:3];
            write_mem[index] = tb_intf.data_in.data_wr;
        end else  //store the read address
            rd_addr_stored = {rd_addr_stored,tb_intf.data_in.physical_addr [31:3]};
     end
-    
+end
+always @(rd_end)
+begin    
     if (rd_end)
        raddr   = rd_addr_stored.pop_front;            
 end  
@@ -70,30 +69,34 @@ end
 
 always @(rd_end_d)
 begin
+  
    string RESULT;
    if (rd_end_d) begin
-     data_wr = write_mem[raddr];     
-     if (tb_intf.BL == 8) begin
-        data_rd = {data_t[4], data_c[4], data_t[3], data_c[3], 
-                   data_t[2], data_c[2], data_t[1], data_c[1]};     
-        if (data_wr == data_rd)             
-           RESULT = "PASS";
-        else 
-           RESULT = "FAIL";   
-        data_check_8: assert (data_wr == data_rd);
-        $fwrite(file, "%t  Addr: 0x%h  Wr_Data: 0x%h   Rd_Data:0x%h  Result:%s\n", 
-               $stime, raddr,  data_wr, data_rd, RESULT);
-     end      
-     else begin
-        data_rd  = {'0,data_t[4], data_c[4], data_t [3], data_c[3]};
-        if (data_wr[31:0] == data_rd)             
-           RESULT = "PASS";
-        else 
-           RESULT = "FAIL";   
-       $fwrite(file, "%t  Addr: 0x%h  Wr_Data: 0x%h   Rd_Data:0x%h  Result:%s\n", 
-             $stime, raddr,  data_wr[31:0], data_rd[31:0], RESULT);           
-        data_check_4: assert (data_wr[31:0] == data_rd);
-     end   
+     if (raddr_prev != raddr) begin
+        data_wr = write_mem[raddr];     
+        if (tb_intf.BL == 8) begin
+           data_rd = {data_t[4], data_c[4], data_t[3], data_c[3], 
+                      data_t[2], data_c[2], data_t[1], data_c[1]};     
+           if (data_wr == data_rd)             
+              RESULT = "PASS";
+           else 
+              RESULT = "FAIL";   
+           data_check_8: assert (data_wr == data_rd);
+           $fwrite(file, "%t  Addr: 0x%h  Wr_Data: 0x%h   Rd_Data:0x%h  Result:%s\n", 
+                  $stime, raddr,  data_wr, data_rd, RESULT);
+        end      
+        else begin
+           data_rd  = {'0,data_t[4], data_c[4], data_t [3], data_c[3]};
+           if (data_wr[31:0] == data_rd)             
+              RESULT = "PASS";
+           else 
+              RESULT = "FAIL";   
+           $fwrite(file, "%t  Addr: 0x%h  Wr_Data: 0x%h   Rd_Data:0x%h  Result:%s\n", 
+                   $stime, raddr,  data_wr[31:0], data_rd[31:0], RESULT);           
+            data_check_4: assert (data_wr[31:0] == data_rd);
+       end   
+       raddr_prev = raddr;
+     end  
    end 
 end
     

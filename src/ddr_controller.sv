@@ -15,8 +15,7 @@
 
 module DDR_CONTROLLER (DDR_INTERFACE intf,
                        CTRL_INTERFACE ctrl_intf,
-                       TB_INTERFACE tb_intf,
-                       input logic mrs_update,[1:0] mrs_bl);
+                       TB_INTERFACE tb_intf);
 
                        
 ctrl_fsm_type ctrl_state, ctrl_next_state;
@@ -66,7 +65,7 @@ begin
            
    CTRL_RW: begin
       clear_counter <= 1'b0;    // assume refresh occurs only rw, and update
-      if ((mrs_update) || (refresh_almost)) begin
+      if ((tb_intf.mrs_update) || (refresh_almost)) begin
          ctrl_next_state    <= CTRL_WAIT;    
          ctrl_intf.rw_proc  <= 1'b0;                    
       end
@@ -79,7 +78,7 @@ begin
          else begin
             ctrl_intf.mrs_update_rdy  <= 1'b1;
             //copy MR0 from burst_conf and update burst length
-            ctrl_intf.mrs_update_cmd <= {ctrl_intf.mr0[MRS_WIDTH -1:2],mrs_bl};
+            ctrl_intf.mrs_update_cmd <= {ctrl_intf.mr0[MRS_WIDTH -1:2],tb_intf.bl_update};
             ctrl_next_state <= CTRL_UPDATE;  
          end
       end

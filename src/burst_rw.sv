@@ -20,15 +20,10 @@
 //note: use clock_t as main clock
 module BURST_RW (DDR_INTERFACE intf,
                  CTRL_INTERFACE ctrl_intf);
-                 //input int RD_DELAY, WR_DELAY, //from BURST DATA module
-                 //input logic cas_rdy,          //cas_rdy from cas module
-                 //input logic [1:0] rw,         //from cas module
-                 //output logic rw_rdy, rw_done, data_idle);
 
 int   DELAY;  
    
 rw_fsm_type rw_state, rw_next_state;
-//logic rw_cmd, 
 logic next_rw;  
 logic clear_rw_counter = 1'b0; 
 int rw_counter,rw_delay;

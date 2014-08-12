@@ -21,8 +21,7 @@
 module BURST_ACT (DDR_INTERFACE intf,
                   CTRL_INTERFACE ctrl_intf,
                   TB_INTERFACE   tb_intf);
-                  //input logic act_cmd
-                  
+                 
 
 act_fsm_type act_state, act_next_state;
 int act_counter;
