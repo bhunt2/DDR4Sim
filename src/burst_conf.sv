@@ -16,13 +16,13 @@
 module BURST_CONF (DDR_INTERFACE intf,
                    CTRL_INTERFACE ctrl_intf);
                    
-parameter CAS_DLY     = 4;
+parameter tCCD        = 4;
 parameter WR_DLY      = 10;
 parameter RD_DLY      = 13;
 parameter W_PRE       = 1'b1;
 parameter R_PRE       = 1'b1;
-parameter BURST_LENGTH= 2'b10;
-parameter AL_DLY      = 0;
+parameter BURST_LENGTH= 2'b00;
+parameter AL_DLY      = 2'b00;
 
 bit [2:0] cas, wr;
 bit [3:0] rd;
@@ -46,17 +46,17 @@ task init_task ();
    
    wait (intf.reset_n); repeat (tCKE_L - tIS) @(posedge intf.clock_t);
    intf.cke 				<= 1'b1;
-   $cast(cas,(CAS_DLY -4));
+   $cast(cas,(tCCD   -4));
    $cast(wr, (WR_DLY -9));
    $cast(rd, (RD_DLY -9));
    
    //DES
-   repeat (tIS + 1) @(posedge intf.clock_t);
+   repeat (tIS) @(posedge intf.clock_t);
    ctrl_intf.des_rdy 		<= 1'b1;
    ctrl_intf.mode_reg 		<= 'x;
    
    //MR3
-   repeat (tXPR+ 1) @(posedge intf.clock_t);
+   repeat (tXPR) @(posedge intf.clock_t);
    ctrl_intf.des_rdy 		<= 1'b0;
    ctrl_intf.mrs_rdy 		<= 1'b1;
    ctrl_intf.mode_reg 		<= {1'b0,3'b011,2'b00,2'b0,2'b00,3'b000,1'b0,1'b0,1'b0,1'b0,2'b00};
@@ -104,7 +104,7 @@ task init_task ();
    //MR1
    repeat (tMRD) @(posedge intf.clock_t); ctrl_intf.mrs_rdy <= 1'b1; 
    ctrl_intf.des_rdy 		<= 1'b0;
-   ctrl_intf.mode_reg 		<= {1'b0,3'b001,1'b0,1'b0,1'b0,1'b0,3'b000,1'b0, 1'b0,2'b00,AL_DLY,2'b00,1'b1};
+   ctrl_intf.mode_reg 		<= {1'b0,3'b001,1'b0,1'b0,1'b0,1'b0,3'b000,1'b0, 2'b00,AL_DLY,2'b00,1'b1};
    @(posedge intf.clock_t); 
    ctrl_intf.mrs_rdy 		<= 1'b0; 
    ctrl_intf.des_rdy 		<= 1'b1;

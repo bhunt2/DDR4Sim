@@ -42,11 +42,11 @@ package ddr_pkg;
    
    parameter nCK      = 1.25;
    parameter tRTP     = 7.5/nCK;
-   parameter tWTR     = 7.5/nCK;
+   parameter tWTR     = int'(7.5/nCK);
    parameter tWR      = 15/nCK;
    parameter tRP      = 12.5/nCK;
-   parameter ACT_DELAY = 7.5/nCK;         //act to act cmds latency
-   parameter CAS_DELAY = 12.5/nCK;        //act to cas cmd latency
+   parameter ACT_DELAY = int'(7.5/nCK);         //act to act cmds latency
+   parameter tRCD = 12.5/nCK;                   //act to cas latency
 
    //timming parameter for reset
    //parameter tCKE_L   = 500000/nCK;
@@ -56,8 +56,8 @@ package ddr_pkg;
    parameter tMOD     = 24;
    parameter tZQ      = 4096;
    parameter tIS      = 10;
-   parameter tREF     = 7800/nCK;          //7.8us
-   parameter tRC      = 47.5/nCK;          //refresh to act
+   parameter tREF     = int'(7800/nCK);          //7.8us
+   parameter tRC      = 47.5/nCK;                //refresh to act
    
    
    //temporary define enum for commands
@@ -65,7 +65,7 @@ package ddr_pkg;
    
    //typedef for states in DDR CONTROLLER
    typedef enum {CTRL_IDLE, CTRL_INIT, CTRL_RW, CTRL_UPDATE, 
-                 CTRL_WAIT, CTRL_REFRESH}
+                 CTRL_WAIT, CTRL_REFRESH, CTRL_ACT}
                 ctrl_fsm_type;
   
    //typedef for states in BURST_ACT

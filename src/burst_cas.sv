@@ -67,7 +67,8 @@ begin
               ignore <= 1'b0;
            if (ctrl_intf.act_rdy ) begin
               cas_next_state <= CAS_WAIT_STATE;
-              //execute reset or after precharge command
+              
+              //execute after reset or precharge command
               if (!ignore)  begin
                 prev_rq <= ctrl_intf.act_rw;
                 ignore  <= 1'b1;
@@ -82,7 +83,8 @@ begin
           //satisfy the tRDD 
           if (cas_counter == cas_delay) begin
              clear_cas_counter <= 1'b1;
-             //determine back to back read or write)
+             
+             //check for back to back read or write
              if (prev_rq == request) begin
                  
                 cas_next_state    <= CAS_CMD; 
@@ -99,7 +101,7 @@ begin
                            .extra_count(extra_count));
                 prev_rq           <= request;           
                 if (rtw == 1'b1) 
-                   //cas_next_state <= CAS_WAIT_EXTRA;           
+                //   cas_next_state <= CAS_WAIT_EXTRA;           
                 //else            
                    cas_next_state <= CAS_WAIT_DATA;
                 end
@@ -110,8 +112,8 @@ begin
            
            ctrl_intf.cas_rdy <= 1'b0;
            clear_cas_counter <= 1'b1;
-           //determine the handshake signal clear_cas_counter above should be 
-           //here or move to next previous state to speed up 1 clock cycle
+           
+           //next CAS cmd in queue
            if (next_cas) begin
                cas_next_state <= CAS_WAIT_STATE;                 
            end
@@ -144,7 +146,7 @@ begin
 end  
          
 //tracking on ACT command to calulate cas_delay and r/w request
-always @ (intf.reset_n, ctrl_intf.act_rdy, next_cas)//, ctrl_intf.act_rw, cas_state)
+always @ (intf.reset_n, ctrl_intf.act_rdy, next_cas)
 begin
 
    if (!intf.reset_n) begin
@@ -154,18 +156,21 @@ begin
       request   = '0;
    end
    
+   //set to the tRCD if ACT_CMD occur in state IDLE or CAS_CMD
+   //tRCD : ACT to CAS latency
    if (((cas_state == CAS_IDLE) || (cas_state == CAS_CMD)) && 
        (ctrl_intf.act_rdy)) begin
-      cas_delay = CAS_DELAY - 1;
+        
+      cas_delay = tRCD - 1;
       request   = ctrl_intf.act_rw;
    end 
+
+   //pop out the next cmd in queue
    else if ((cas_state == CAS_CMD) && (next_cas)) begin
-//      temp = act_cmd_trk.pop_front;
-//      if ( (CAS_DELAY - temp - 1 ) < ctrl_intf.tCCD) 
-//         cas_delay = CAS_DELAY - temp -1;
-//      else   
-//         cas_delay = ctrl_intf.tCCD;
-      temp = (CAS_DELAY - act_cmd_trk.pop_front - 1);
+      //tRCD - # cycles that ACT cmd waited
+      temp = (tRCD - act_cmd_trk.pop_front - 1);
+
+      //ensure tCCD (CAS - CAS delay) constraint
       if (temp > ctrl_intf.tCCD)
          cas_delay = temp;
       else
@@ -173,19 +178,19 @@ begin
             
       request   = act_rw_trk.pop_front;
       
-      //update the queue for update # cycles each cmd waited.               
+      //updated waited cycles for each ACT cmd in queue by
+      //adding clock cycle of current ACT cmd to it.               
       foreach (act_cmd_trk[i]) 
          act_cmd_trk [i] = {(act_cmd_trk[i] + cas_delay +1 )};
    end
-         
+   
+   //recorded ACT cmd in queue while executing the previous cmd
    if ((ctrl_intf.act_rdy) && 
        ((cas_state != CAS_IDLE)  && (cas_state != CAS_CMD))) begin
+
       act_cmd_trk = {act_cmd_trk, (cas_delay - cas_counter )}; 
-      
-   //if ((^ctrl_intf.act_rw) && (cas_state != CAS_IDLE))       
       act_rw_trk  = {act_rw_trk, ctrl_intf.act_rw};    
    end       
-   //$display ("Size of the cas queue %d  %d", act_cmd_trk.size, act_rw_trk.size);          
 end         
 
       
@@ -198,7 +203,7 @@ begin
        cas_counter <= cas_counter + 1;
 end
                     
-//determine act cmd avail in queue.
+//checking any ACT cmd in queue.
 always_ff @ (posedge intf.clock_t)
 begin
    if ((cas_next_state == CAS_CMD) &&
@@ -208,8 +213,8 @@ begin
       next_cas <= 1'b0;
 end     
 
- //extra count for read to write CL - CWL + BL/2 + 2nclk
- //extra count for write to read 4nclk + tWTR           
+//extra latency for read to write CL - CWL + BL/2 + 2nclk
+//extra latency for write to read 4nclk + tWTR           
 function void extra_wait(input logic[1:0] prev_rq, request, 
                          output logic rtw,
                          output int extra_count);

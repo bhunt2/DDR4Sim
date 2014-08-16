@@ -26,6 +26,9 @@ logic clear_counter, refresh_almost,refresh_done;
 int   update_counter;
 logic clear_update_counter, update_done;
 
+int   wait_counter;
+logic clear_wait_counter, wait_done;
+
 assign  tb_intf.dev_busy = (ctrl_state == CTRL_RW)? 1'b0: 1'b1;
   
 //fsm ddr controller
@@ -64,7 +67,7 @@ begin
    end
            
    CTRL_RW: begin
-      clear_counter <= 1'b0;    // assume refresh occurs only rw, and update
+      clear_counter <= 1'b0;       // assume refresh occurs only rw, and update
       if ((tb_intf.mrs_update) || (refresh_almost)) begin
          ctrl_next_state    <= CTRL_WAIT;    
          ctrl_intf.rw_proc  <= 1'b0;                    
@@ -74,11 +77,12 @@ begin
    CTRL_WAIT: begin
       if (ctrl_intf.rw_idle) begin
          if (refresh_almost)
-            ctrl_next_state <= CTRL_REFRESH;
+            ctrl_next_state           <= CTRL_REFRESH;
          else begin
             ctrl_intf.mrs_update_rdy  <= 1'b1;
+            
             //copy MR0 from burst_conf and update burst length
-            ctrl_intf.mrs_update_cmd <= {ctrl_intf.mr0[MRS_WIDTH -1:2],tb_intf.bl_update};
+            ctrl_intf.mrs_update_cmd  <= {ctrl_intf.mr0[MRS_WIDTH -1:2],tb_intf.bl_update};
             ctrl_next_state <= CTRL_UPDATE;  
          end
       end
@@ -88,17 +92,28 @@ begin
       ctrl_intf.mrs_update_rdy       <= 1'b0;
       clear_update_counter           <= 1'b0;
       if (update_done) begin
-         ctrl_next_state    <= CTRL_RW;
+         ctrl_next_state      <= CTRL_RW;
          clear_update_counter <= 1'b1;
       end
    end
            
    CTRL_REFRESH: begin
       if (refresh_done) begin
-         ctrl_next_state   <= CTRL_RW;
+         clear_counter      <= 1'b1;
+         clear_wait_counter <= 1'b0;
+         ctrl_next_state    <= CTRL_ACT;
+         //ctrl_intf.rw_proc <= 1'b1;
+      end   
+    end
+      
+    CTRL_ACT: begin
+      clear_counter             <= 1'b0;
+      if (wait_done) begin
+         clear_wait_counter     <= 1'b1;
+         ctrl_next_state        <= CTRL_RW;
          ctrl_intf.rw_proc <= 1'b1;
       end   
-      end
+    end   
              
    default: ctrl_next_state <= CTRL_IDLE;
           
@@ -116,19 +131,34 @@ end
           end
        else begin
           refresh_counter <= refresh_counter + 1;
-          if (refresh_counter == tREF - 100) 
+          if (refresh_counter == tREF - 50) 
              refresh_almost <= 1'b1;
-          else if (refresh_counter == tREF) begin
+          else if (refresh_counter == (tREF -1)) begin
              refresh_almost <= 1'b0;
              ctrl_intf.refresh_rdy <= 1'b1;
           end   
-          else if (refresh_counter == tREF + 1)
+          else if (refresh_counter == tREF) begin
              ctrl_intf.refresh_rdy <= 1'b0;   
-          else if (refresh_counter == tREF + tRC)
-             refresh_done    <= 1'b1;
-          end        
-     end 
+             refresh_done          <= 1'b1;
+          //else if (refresh_counter == tREF + tRC)
+          //   refresh_done    <= 1'b1;
+          end 
+        end          
+    end 
       
+    always_ff @(posedge intf.clock_t)
+    begin
+       if(clear_wait_counter == 1'b1) begin
+          wait_done      <= 1'b0;
+          wait_counter <= 0;
+          end
+       else begin
+          wait_counter  <= wait_counter + 1;
+          if (wait_counter == tRC) 
+             wait_done  <= 1'b1;
+       end                            
+    end 
+     
        // simple act_counter 
     always_ff @(posedge intf.clock_t)
     begin

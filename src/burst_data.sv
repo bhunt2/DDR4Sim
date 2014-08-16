@@ -133,7 +133,7 @@ begin
    3'b000: begin
        if (int'(ctrl_intf.mode_reg[6:3]) < 12) 
           ctrl_intf.CL= 9 + int'(ctrl_intf.mode_reg [6:3]); //9-24 clock cycles                    
-       if (int'(ctrl_intf.mode_reg[1:0]) == 2)
+       if (ctrl_intf.mode_reg[1:0] === 2'b10)
           ctrl_intf.BL = 4;
        else
           ctrl_intf.BL = 8;  

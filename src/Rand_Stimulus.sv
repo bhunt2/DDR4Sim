@@ -48,11 +48,11 @@ class Gen_Packet;
           Packet_array[i] = new();
     endfunction
     
-    function void print_all() ;
-    foreach (Packet_array[i])
-       $display ("addr = %h, data = %h, rw = %h", Packet_array[i].addr_r, 
-          Packet_array[i].data_r, Packet_array[i].op_r);
-    endfunction      
+    //function void print_all() ;
+    //foreach (Packet_array[i])
+    //   $display ("addr = %h, data = %h, rw = %h", Packet_array[i].addr_r, 
+    //      Packet_array[i].data_r, Packet_array[i].op_r);
+    //endfunction      
                 
 endclass
     
@@ -68,7 +68,7 @@ initial begin
 	
 	assert (p.randomize())
 	else $fatal(0, "Gen_Packet::randomize failed");
-	p.print_all();
+	//p.print_all();
 	
 	foreach (p.Packet_array[i]) begin
 	   Stim_st.data_wr       = p.Packet_array[i].data_r;

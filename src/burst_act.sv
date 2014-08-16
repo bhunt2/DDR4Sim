@@ -27,9 +27,9 @@ act_fsm_type act_state, act_next_state;
 int act_counter;
 logic clear_act_counter;
    
-logic hit = 1'b0;    //same bank and row
-logic miss= 1'b0;    //same bank different row
-logic bank_ini = 1'b1;  //signal to start initialized bank_activated after reset
+logic hit = 1'b0;        //same bank and row
+logic miss= 1'b0;        //same bank different row
+logic bank_ini = 1'b1;   //signal to start initialized bank_activated after reset
    
 int pre_extra_cycles;
 logic [1:0] request;
@@ -69,8 +69,7 @@ begin
          ctrl_intf.act_idle <= 1'b1;
          ctrl_intf.pre_rdy  <= 1'b0;
          ctrl_intf.act_rdy  <= 1'b0;
-         if ((tb_intf.act_cmd) && (ctrl_intf.rw_proc)) begin  //NOTE PUT THE LINE
-                                                              //BACK AFTER DEBUG
+         if ((tb_intf.act_cmd) && (ctrl_intf.rw_proc)) begin  
             act_next_state <= ACT_WAIT_STATE;
             bank_activated_chk();               
          end   
@@ -90,7 +89,7 @@ begin
             else if ((act_counter == ACT_DELAY) && (!hit) && (!miss))
             begin
                if (ctrl_intf.cas_rdy == 1'b1) begin //delay to avoid assert
-                                                    // both CAS and ACT in one cycle 
+                                                    //both CAS and ACT in one cycle 
                   act_next_state <= ACT_ONE_DELAY;  
                   ctrl_intf.act_rdy = 1'b0;
                end else begin          

@@ -75,6 +75,8 @@ add wave -noupdate /top/ddr_top/ctrl_intf/CWL
 add wave -noupdate /top/ddr_top/ctrl_intf/CL
 add wave -noupdate /top/ddr_top/ctrl_intf/mrs_rdy
 add wave -noupdate /top/ddr_top/ctrl_intf/mode_reg
+add wave -noupdate /top/ddr_top/burst_cas/request
+add wave -noupdate /top/ddr_top/burst_cas/prev_rq
 TreeUpdate [SetDefaultTree]
 WaveRestoreCursors {{Cursor 1} {465418 ps} 0} {{Cursor 2} {305208 ps} 0}
 quietly wave cursor active 2
@@ -92,4 +94,4 @@ configure wave -griddelta 40
 configure wave -timeline 0
 configure wave -timelineunits ms
 update
-WaveRestoreZoom {304735 ps} {306377 ps}
+WaveRestoreZoom {498441 ps} {500083 ps}
