@@ -19,7 +19,7 @@ timeprecision 1ps;
 
   //testing variables
   DDR_INTERFACE intf();
-  CHECKER c1(.intf(intf));
+  //CHECKER c1(.intf(intf));
   TB_INTERFACE tb_intf();             
   DDR_CLOCK ddr_clock (.intf(intf));   
 
