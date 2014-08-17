@@ -105,9 +105,10 @@ begin
    end
       
    //calculate # cycles each RW command waited in queue
-   if(((rw_state == RW_IDLE) || (rw_state == RW_DATA)) && 
-       (ctrl_intf.cas_rdy))begin
-       
+//   if(((rw_state == RW_IDLE) || (rw_state == RW_DATA)) && 
+//       (ctrl_intf.cas_rdy))begin
+   if((rw_state == RW_IDLE)  && 
+      (ctrl_intf.cas_rdy))begin       
       if (ctrl_intf.act_rw == READ)
          DELAY = ctrl_intf.RD_DELAY;
       else 
@@ -134,9 +135,12 @@ begin
               rw_cmd_trk [i] = {(rw_cmd_trk[i] + rw_delay +1 )};
    end
    
+//   if ((ctrl_intf.cas_rdy) &&
+//        ((rw_state != RW_IDLE) &&
+//        ((rw_state != RW_DATA) && (rw_next_state != RW_IDLE)))) begin
    if ((ctrl_intf.cas_rdy) &&
-        ((rw_state != RW_IDLE) &&
-        ((rw_state != RW_DATA) && (rw_next_state != RW_IDLE)))) begin
+       (rw_state != RW_IDLE))
+      begin
       rw_cmd_trk = {rw_cmd_trk, (rw_delay - rw_counter)};
       rw_trk     = {rw_trk, ctrl_intf.cas_rw}; 
    end                

@@ -32,6 +32,7 @@ logic[1:0] request, prev_rq ;
 logic ignore = 1'b0;
 
 int temp;
+int size_queue;
    
 //fsm control timing between CAS and act
 always_ff @(posedge intf.clock_t, negedge intf.reset_n)
@@ -65,7 +66,9 @@ begin
            clear_cas_counter   <= 1'b1;   
            if (ctrl_intf.pre_rdy)
               ignore <= 1'b0;
-           if (ctrl_intf.act_rdy ) begin
+           if ((ctrl_intf.act_rdy ) || 
+               (ctrl_intf.no_act_rdy)) begin
+               
               cas_next_state <= CAS_WAIT_STATE;
               
               //execute after reset or precharge command
@@ -101,8 +104,8 @@ begin
                            .extra_count(extra_count));
                 prev_rq           <= request;           
                 if (rtw == 1'b1) 
-                //   cas_next_state <= CAS_WAIT_EXTRA;           
-                //else            
+                   cas_next_state <= CAS_WAIT_EXTRA;           
+                else            
                    cas_next_state <= CAS_WAIT_DATA;
                 end
             end
@@ -146,7 +149,7 @@ begin
 end  
          
 //tracking on ACT command to calulate cas_delay and r/w request
-always @ (intf.reset_n, ctrl_intf.act_rdy, next_cas)
+always @ (intf.reset_n, ctrl_intf.act_rdy, ctrl_intf.no_act_rdy, next_cas)
 begin
 
    if (!intf.reset_n) begin
@@ -159,7 +162,7 @@ begin
    //set to the tRCD if ACT_CMD occur in state IDLE or CAS_CMD
    //tRCD : ACT to CAS latency
    if (((cas_state == CAS_IDLE) || (cas_state == CAS_CMD)) && 
-       (ctrl_intf.act_rdy)) begin
+       ((ctrl_intf.act_rdy)     || (ctrl_intf.no_act_rdy))) begin
         
       cas_delay = tRCD - 1;
       request   = ctrl_intf.act_rw;
@@ -169,7 +172,7 @@ begin
    else if ((cas_state == CAS_CMD) && (next_cas)) begin
       //tRCD - # cycles that ACT cmd waited
       temp = (tRCD - act_cmd_trk.pop_front - 1);
-
+      size_queue  = act_cmd_trk.size;
       //ensure tCCD (CAS - CAS delay) constraint
       if (temp > ctrl_intf.tCCD)
          cas_delay = temp;
@@ -183,13 +186,17 @@ begin
       foreach (act_cmd_trk[i]) 
          act_cmd_trk [i] = {(act_cmd_trk[i] + cas_delay +1 )};
    end
-   
+end
+
+always @(ctrl_intf.act_rdy, ctrl_intf.no_act_rdy)
+begin   
    //recorded ACT cmd in queue while executing the previous cmd
-   if ((ctrl_intf.act_rdy) && 
+   if (((ctrl_intf.act_rdy)      || (ctrl_intf.no_act_rdy))  && 
        ((cas_state != CAS_IDLE)  && (cas_state != CAS_CMD))) begin
 
       act_cmd_trk = {act_cmd_trk, (cas_delay - cas_counter )}; 
       act_rw_trk  = {act_rw_trk, ctrl_intf.act_rw};    
+     // size_queue  = act_cmd_trk.size;
    end       
 end         
 
@@ -222,8 +229,8 @@ begin
    rtw           = 1'b0;
    if ((prev_rq == READ) && 
        (request == WRITE)) begin
-      rtw         = 1'b1;
-      extra_count = ctrl_intf.CL - ctrl_intf.CWL + ctrl_intf.BL/2 + 2;    
+        rtw         = 1'b1;
+        extra_count = ctrl_intf.CL - ctrl_intf.CWL + ctrl_intf.BL/2 + 2;    
    end 
    else if ((prev_rq == WRITE) && 
             (request == READ))  

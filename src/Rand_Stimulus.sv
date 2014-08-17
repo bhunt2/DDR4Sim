@@ -8,8 +8,9 @@ module Rand_Stimulus( DDR_INTERFACE intf,
                       TB_INTERFACE tb_intf);
 
 // Set number of operations to be stored in the queue
-parameter num_op = 100;
-
+parameter num_op = 500;
+int read_count = 0;
+int write_count = 0;
 // Use class for randomization
 class Packet;
 // Random variables
@@ -74,7 +75,11 @@ initial begin
 	   Stim_st.data_wr       = p.Packet_array[i].data_r;
 	   Stim_st.physical_addr = p.Packet_array[i].addr_r;
 	   Stim_st.rw            = p.Packet_array[i].op_r;
-
+	   if (Stim_st.rw == 2'b10)
+	       write_count ++;
+	   else
+           read_count ++;    
+	       
  	   su.push_front(Stim_st);
 	end
 

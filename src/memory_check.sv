@@ -72,7 +72,7 @@ begin
   
    string RESULT;
    if (rd_end_d) begin
-     if (raddr_prev != raddr) begin
+     //if (raddr_prev != raddr) begin
         data_wr = write_mem[raddr];     
         if (tb_intf.BL == 8) begin
            data_rd = {data_t[4], data_c[4], data_t[3], data_c[3], 
@@ -95,8 +95,8 @@ begin
                    $stime, raddr,  data_wr[31:0], data_rd[31:0], RESULT);           
             data_check_4: assert (data_wr[31:0] == data_rd);
        end   
-       raddr_prev = raddr;
-     end  
+     //  raddr_prev = raddr;
+     //end  
    end 
 end
     

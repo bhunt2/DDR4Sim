@@ -36,6 +36,9 @@ logic [1:0] request;
 logic [NUMBER_BANK-1:0] [RA_WIDTH -1:0] bank_activated = 'x;
    
 command_type pre_command;
+logic act_rdy, act_rdy_d,act_tmp;
+logic no_act, no_act_d, no_act_tmp;
+logic cas_d, rw_d;
    
 //idle when all ACT, CAS, and RW sequence are all idle
 always_comb
@@ -48,9 +51,40 @@ always_ff @(posedge intf.clock_t, negedge intf.reset_n)
 begin
    if (!intf.reset_n) 
       act_state <= ACT_IDLE;
-   else 
+   else begin
       act_state <= act_next_state;
+      no_act_d  <= no_act;
+      act_rdy_d <= act_rdy;
+      rw_d      <= ctrl_intf.rw_rdy;
+      cas_d     <= ctrl_intf.cas_rdy;
+   end   
 end
+  
+always_ff @(posedge intf.clock_t)
+begin
+    ctrl_intf.act_rdy    <= act_tmp;
+    ctrl_intf.no_act_rdy <= no_act_tmp;
+end
+
+   
+always_comb
+begin
+    if (((no_act   == 1'b1) && (ctrl_intf.cas_rdy == 1'b1)) ||
+        ((no_act_d == 1'b1) && (cas_d             == 1'b1)))
+       no_act_tmp  <= no_act_d;
+    else   
+       no_act_tmp <= no_act;
+end
+    
+always_comb
+begin
+    if (((act_rdy   == 1'b1) && (ctrl_intf.cas_rdy == 1'b1)) ||
+        ((act_rdy_d == 1'b1) && (cas_d             == 1'b1)))
+       act_tmp   <= act_rdy_d;
+    else   
+       act_tmp   <= act_rdy;
+end
+      
    
 always_comb
 begin
@@ -58,7 +92,8 @@ begin
       act_next_state     <= ACT_IDLE;
       clear_act_counter  <= 1'b1;
       ctrl_intf.act_idle <= 1'b0;
-      ctrl_intf.act_rdy  <= 1'b0;
+      act_rdy            <= 1'b0;
+      no_act             <= 1'b0;
       bank_ini           = 1'b1;
       bank_activated_chk();         
    end
@@ -68,7 +103,8 @@ begin
          bank_ini           = 1'b0;
          ctrl_intf.act_idle <= 1'b1;
          ctrl_intf.pre_rdy  <= 1'b0;
-         ctrl_intf.act_rdy  <= 1'b0;
+         act_rdy            <= 1'b0;
+         no_act             <= 1'b0;
          if ((tb_intf.act_cmd) && (ctrl_intf.rw_proc)) begin  
             act_next_state <= ACT_WAIT_STATE;
             bank_activated_chk();               
@@ -76,54 +112,37 @@ begin
       end
               
       ACT_WAIT_STATE: begin  
-         clear_act_counter  <= 1'b0;  
-         ctrl_intf.act_idle <= 1'b0;
+         clear_act_counter    <= 1'b0;  
+         ctrl_intf.act_idle   <= 1'b0;
+         no_act               <= 1'b0;
+         act_rdy              <= 1'b0;
                
-         if ((act_counter == ACT_DELAY) && (hit)) begin  
-            act_next_state   <= ACT_CAS;  
-            ctrl_intf.act_rdy <= 1'b1;
-            ctrl_intf.act_rw  <= ctrl_intf.rw;
+         if ((act_counter == ACT_DELAY) && (hit)) begin 
+               act_next_state       <= ACT_CAS;  
+               no_act               <= 1'b1;
+               ctrl_intf.act_rw     <= ctrl_intf.rw;
          end
-            else if ((act_counter == ACT_DELAY) && (miss))
-               act_next_state <= PRE_WAIT_DATA;
-            else if ((act_counter == ACT_DELAY) && (!hit) && (!miss))
-            begin
-               if (ctrl_intf.cas_rdy == 1'b1) begin //delay to avoid assert
-                                                    //both CAS and ACT in one cycle 
-                  act_next_state <= ACT_ONE_DELAY;  
-                  ctrl_intf.act_rdy = 1'b0;
-               end else begin          
-                  act_next_state    <= ACT_CMD;
-                  ctrl_intf.act_rdy <= 1'b1;
-                  ctrl_intf.act_rw  <= ctrl_intf.rw;                  
-               end   
-            end
-      end             
-         
-      ACT_ONE_DELAY: begin
-         
-            act_next_state    <= ACT_TWO_DELAY;
-//            ctrl_intf.act_rdy <= 1'b1;
-//            ctrl_intf.act_rw  <= ctrl_intf.rw;
+         else if ((act_counter == ACT_DELAY) && (miss))
+              act_next_state <= PRE_WAIT_DATA;
+         else if ((act_counter == ACT_DELAY) && (!hit) && (!miss))
+         begin
+              act_next_state    <= ACT_CMD;
+              act_rdy           <= 1'b1;
+              ctrl_intf.act_rw  <= ctrl_intf.rw;                  
+         end   
       end
-   
-      ACT_TWO_DELAY: begin
          
-            act_next_state    <= ACT_CMD;
-            ctrl_intf.act_rdy <= 1'b1;
-            ctrl_intf.act_rw  <= ctrl_intf.rw;
-      end            
       ACT_CMD: begin
-         clear_act_counter <= 1'b1; 
-         ctrl_intf.act_rdy <= 1'b0; 
-         act_next_state <= ACT_IDLE;
+           clear_act_counter    <= 1'b1;  
+           act_rdy              <= 1'b0; 
+           act_next_state       <= ACT_IDLE;
       end
              
          //skip the activate command.
       ACT_CAS: begin
-         ctrl_intf.act_rdy <= 1'b0;
-         clear_act_counter <= 1'b1;  
-         act_next_state <= ACT_IDLE;
+         clear_act_counter    <= 1'b1;  
+         no_act               <= 1'b0;
+         act_next_state       <= ACT_IDLE;         
       end
              
            
@@ -158,7 +177,7 @@ begin
       PRE_IDLE: begin
          clear_act_counter <= 1'b0;
          if (act_counter == tRP) begin
-            ctrl_intf.act_rdy <= 1'b1;
+            act_rdy           <= 1'b1;
             ctrl_intf.act_rw  <= ctrl_intf.rw;
             act_next_state    <= ACT_CMD;
          end        
@@ -209,7 +228,7 @@ endfunction
      
 //function to calculate the time delay from previous CAS to precharge.
 //previous CAS was read, then RTP =  tRTP
-//previous CAS is write then WTP = WL+4+WR
+//previous CAS was write then WTP = WL+4+WR
      
 function void pre_extra_wait();
 begin

@@ -35,13 +35,13 @@ timeprecision 1ps;
 
 
   DDR_TOP #(.tCCD (4), 
-            .WR_DLY(10),
-            .RD_DLY(13),
+            .tCAS_W(10),
+            .tCAS_R(13),
             .W_PRE(1'b1),
             .R_PRE(1'b1),
-            .BURST_LENGTH(2'b00),
+            .BURST_LENGTH(2'b10),
             .AL_DLY(2'b00))ddr_top(.intf(intf),
-                               .tb_intf(tb_intf));
+                                   .tb_intf(tb_intf));
 initial 
 begin
 intf.reset_n <= 'x;

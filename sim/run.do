@@ -16,7 +16,6 @@ vlog -work work -sv ../src/ddr_clock.sv
 vlog -work work -sv ../src/Rand_Stimulus.sv
 vlog -work work -sv ../src/jn_assertion.sv
 vlog -work work -sv ../src/test.sv
-vlog -work work -sv ../src/Stimulus_save.sv
 vsim -voptargs=+acc work.top
 do wave.do
 

@@ -36,33 +36,38 @@ add wave -noupdate -radix hexadecimal /top/ddr_top/burst_act/act_counter
 add wave -noupdate -radix decimal /top/ddr_top/burst_cas/cas_delay
 add wave -noupdate -radix decimal /top/ddr_top/burst_cas/cas_counter
 add wave -noupdate /top/ddr_top/ctrl_intf/act_rdy
+add wave -noupdate /top/ddr_top/ctrl_intf/no_act_rdy
 add wave -noupdate /top/ddr_top/ctrl_intf/cas_rdy
+add wave -noupdate /top/ddr_top/burst_cas/size_queue
 add wave -noupdate /top/ddr_top/ctrl_intf/rw_rdy
-add wave -noupdate /top/ddr_top/ctrl_intf/act_idle
-add wave -noupdate -expand /top/ddr_top/ctrl_intf/mem_addr
+add wave -noupdate /top/intf/dq
+add wave -noupdate /top/intf/dqs_t
+add wave -noupdate /top/intf/dqs_c
+add wave -noupdate /top/dimm/wr_end
+add wave -noupdate /top/dimm/rd_start
+add wave -noupdate /top/mem_chk/rd_end_d
+add wave -noupdate -expand -subitemconfig {/top/ddr_top/burst_data/cas_in.addr -expand} /top/ddr_top/burst_data/cas_in
+add wave -noupdate -expand -subitemconfig {/top/ddr_top/burst_data/cmd_out.cmd_data -expand /top/ddr_top/burst_data/cmd_out.cmd_data.addr -expand} /top/ddr_top/burst_data/cmd_out
+add wave -noupdate /top/ddr_top/burst_data/rw_in
+add wave -noupdate /top/ddr_top/ctrl_intf/mem_addr
 add wave -noupdate /top/ddr_top/ctrl_intf/pre_reg
-add wave -noupdate -expand /top/ddr_top/burst_data/rw_out
-add wave -noupdate -expand /top/dimm/data_out
-add wave -noupdate -expand /top/dimm/data_t
-add wave -noupdate -expand /top/dimm/data_c
+add wave -noupdate /top/ddr_top/burst_data/rw_out
+add wave -noupdate /top/dimm/data_out
+add wave -noupdate /top/dimm/data_t
+add wave -noupdate /top/dimm/data_c
 add wave -noupdate /top/dimm/row_addr
 add wave -noupdate /top/dimm/col_addr
 add wave -noupdate /top/ddr_top/burst_rw/next_rw
 add wave -noupdate /top/ddr_top/burst_rw/temp
 add wave -noupdate /top/ddr_top/burst_rw/DELAY
 add wave -noupdate /top/ddr_top/burst_rw/rw_delay
-add wave -noupdate -expand /top/dimm/data_t
-add wave -noupdate -expand /top/dimm/data_c
+add wave -noupdate /top/dimm/data_t
+add wave -noupdate /top/dimm/data_c
 add wave -noupdate /top/dimm/wr_end_d
-add wave -noupdate -expand /top/mem_chk/data_c
-add wave -noupdate -expand /top/mem_chk/data_t
+add wave -noupdate /top/mem_chk/data_c
+add wave -noupdate /top/mem_chk/data_t
 add wave -noupdate /top/ddr_top/ctrl_intf/rw_rdy
 add wave -noupdate -label rw /top/ddr_top/burst_data/rw_out.rw
-add wave -noupdate /top/intf/dq
-add wave -noupdate /top/intf/dqs_t
-add wave -noupdate /top/intf/dqs_c
-add wave -noupdate /top/dimm/wr_end_d
-add wave -noupdate /top/mem_chk/rd_end_d
 add wave -noupdate /top/mem_chk/cycle_8
 add wave -noupdate /top/mem_chk/cycle_8_d
 add wave -noupdate /top/intf/clock_n
@@ -77,10 +82,11 @@ add wave -noupdate /top/ddr_top/ctrl_intf/mrs_rdy
 add wave -noupdate /top/ddr_top/ctrl_intf/mode_reg
 add wave -noupdate /top/ddr_top/burst_cas/request
 add wave -noupdate /top/ddr_top/burst_cas/prev_rq
+add wave -noupdate /top/ddr_top/burst_cas/size_queue
 TreeUpdate [SetDefaultTree]
-WaveRestoreCursors {{Cursor 1} {465418 ps} 0} {{Cursor 2} {305208 ps} 0}
+WaveRestoreCursors {{Cursor 1} {465418 ps} 0} {{Cursor 2} {367868 ps} 0}
 quietly wave cursor active 2
-configure wave -namecolwidth 198
+configure wave -namecolwidth 240
 configure wave -valuecolwidth 100
 configure wave -justifyvalue left
 configure wave -signalnamewidth 0
@@ -94,4 +100,4 @@ configure wave -griddelta 40
 configure wave -timeline 0
 configure wave -timelineunits ms
 update
-WaveRestoreZoom {498441 ps} {500083 ps}
+WaveRestoreZoom {367678 ps} {368470 ps}

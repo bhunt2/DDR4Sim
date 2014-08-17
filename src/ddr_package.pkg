@@ -41,12 +41,12 @@ package ddr_pkg;
    //timing parameter
    
    parameter nCK      = 1.25;
-   parameter tRTP     = 7.5/nCK;
+   parameter tRTP     = int'(7.5/nCK);
    parameter tWTR     = int'(7.5/nCK);
-   parameter tWR      = 15/nCK;
-   parameter tRP      = 12.5/nCK;
+   parameter tWR      = int'(15/nCK);
+   parameter tRP      = int'(12.5/nCK);
    parameter ACT_DELAY = int'(7.5/nCK);         //act to act cmds latency
-   parameter tRCD = 12.5/nCK;
+   parameter tRCD      = int'(12.5/nCK);
    parameter CAS_DELAY = int'(12.5/nCK);        //act to cas cmd latency
 
 
@@ -58,8 +58,9 @@ package ddr_pkg;
    parameter tMOD     = 24;
    parameter tZQ      = 4096;
    parameter tIS      = 10;
+   parameter tRAS     = int'(25/nCK);            //act to precharge latency
    parameter tREF     = int'(7800/nCK);          //7.8us
-   parameter tRC      = 47.5/nCK;                //refresh to act
+   parameter tRC      = int'(47.5/nCK);                //refresh to act
    
    
    //temporary define enum for commands

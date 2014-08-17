@@ -6,7 +6,8 @@
 //
 // DATE CREATED: 08/03/2014
 //
-// DESCRIPTION:  The module implements fsm to control sequence for DDR4 Initialization
+// DESCRIPTION:  The module implements fsm to control sequence for DDR4 
+//  Initialization
 //  Refer data sheet for details
 // 
 ///////////////////////////////////////////////////////////////////////////////                       
@@ -17,8 +18,8 @@ module BURST_CONF (DDR_INTERFACE intf,
                    CTRL_INTERFACE ctrl_intf);
                    
 parameter tCCD        = 4;
-parameter WR_DLY      = 10;
-parameter RD_DLY      = 13;
+parameter tCAS_W      = 10;
+parameter tCAS_R      = 13;
 parameter W_PRE       = 1'b1;
 parameter R_PRE       = 1'b1;
 parameter BURST_LENGTH= 2'b00;
@@ -47,8 +48,8 @@ task init_task ();
    wait (intf.reset_n); repeat (tCKE_L - tIS) @(posedge intf.clock_t);
    intf.cke 				<= 1'b1;
    $cast(cas,(tCCD   -4));
-   $cast(wr, (WR_DLY -9));
-   $cast(rd, (RD_DLY -9));
+   $cast(wr, (tCAS_W -9));
+   $cast(rd, (tCAS_R -9));
    
    //DES
    repeat (tIS) @(posedge intf.clock_t);

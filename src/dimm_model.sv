@@ -48,7 +48,14 @@ bit [9:0] addr9_0_d;
 rw_data_type data_out;
 int read_count = 0;
 int write_count = 0;
+int file;
+initial 
+begin
 
+  file = $fopen("../sim/record.txt","w");
+  if(file===0)
+   	$display("Error: Can not open the file."); 
+end
 
 always_ff @ (posedge intf.clock_t)
 begin
@@ -121,14 +128,18 @@ end
 //store and retrieve the row addr
 always_ff @(posedge intf.clock_n, negedge intf.reset_n)
 begin
+   bit [18:0] temp_addr;
+    
    if (!intf.reset_n)
        act_addr_store.delete;
    else begin    
    if (act)
-      act_addr_store = {act_addr_store, act_addr};      
-   if (wr_end || rd_start)
-      row_addr  = act_addr_store.pop_front;
-   end   
+      act_addr_store = {act_addr_store, act_addr};   
+   else if (tb_intf.no_act_rdy) begin
+      temp_addr      = {tb_intf.act_addr.bg_addr,tb_intf.act_addr.ba_addr,tb_intf.act_addr.row_addr};
+      act_addr_store = {act_addr_store, temp_addr}; 
+   end  
+   end      
 end
 
 //capture the col addr
@@ -145,7 +156,17 @@ begin
    else begin    
    if ((rd) || (wr))
       cas_addr_store = {cas_addr_store, cas_addr};
-   if (wr_end || rd_start) 
+//   if ((wr_end || rd_start) &&
+//       (act_addr_store.size != 0))      
+//      col_addr <= cas_addr_store.pop_front;
+   end   
+end
+
+always_ff @(posedge intf.clock_n)
+begin
+   if (((wr_end || rd_start)) &&
+       (act_addr_store.size != 0)) begin
+      row_addr  = act_addr_store.pop_front;
       col_addr <= cas_addr_store.pop_front;
    end   
 end
@@ -183,14 +204,20 @@ begin
    end;   
    
    dimm_index = {row_addr,col_addr};  
-   if ((wr_end_d) && (tb_intf.BL == 8))
+   if ((wr_end_d) && (tb_intf.BL == 8))begin
       dimm[{row_addr,col_addr}] = {data_c[4], data_t[3], data_c[3], data_t[2], 
                                    data_c[2], data_t[1], data_c[1], data_t[0]};
-      
+      $fwrite(file, "%t  row_Addr: 0x%h col_Addr: 0x%h Wr_Data: 0x%h   \n", 
+                  $stime, row_addr, col_addr ,{data_c[4], data_t[3], data_c[3], data_t[2], 
+                                      data_c[2], data_t[1], data_c[1], data_t[0]});
+       end                               
    else if (wr_end_d) begin
 //      $display ("Dimm index write %0x", dimm_index);
         write_count ++;
         dimm[{row_addr,col_addr}] = {data_c[4],data_t[3],data_c[3],data_t[2]} ;   
+      $fwrite(file, "%t  row_Addr: 0x%h col_Addr: %0h  Wr_Data: 0x%h   \n", 
+                  $stime, row_addr, col_addr ,{data_c[4], data_t[3], data_c[3], data_t[2]});
+
    end
       
    if ((rd_start_d) && (tb_intf.BL == 8)) begin
@@ -199,6 +226,8 @@ begin
       data_out.rw      = READ;
       data_out.burst_length = tb_intf.BL;
       data_out.preamble = tb_intf.RD_PRE;
+      $fwrite(file, "%t  row_Addr: 0x%h col_Addr: %0h  Rd_Data: 0x%h   \n", 
+                  $stime, row_addr, col_addr ,data_out.data_wr);
    end   
    else if (rd_start_d) begin
 //      $display ("Dimm index read %0x", dimm_index);
@@ -207,6 +236,8 @@ begin
       data_out.rw            = READ;
       data_out.burst_length  = tb_intf.BL;
       data_out.preamble = tb_intf.RD_PRE;
+      $fwrite(file, "%t  row_Addr: 0x%h col_Addr: %0h  Rd_Data: 0x%h   \n", 
+                  $stime, row_addr, col_addr ,data_out.data_wr);
    end
 end
 
