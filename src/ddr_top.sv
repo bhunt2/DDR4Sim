@@ -7,7 +7,7 @@
 //
 // DATE CREATED: 08/052014
 //
-// DESCRIPTION:  The module is DDR Controller Top Level Module
+// DESCRIPTION:  The module is DDR Controller Top Level Module. 
 // 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -53,21 +53,21 @@ DDR_CONTROLLER ddr_controller (.intf(intf),
                                .ctrl_intf(ctrl_intf),
                                .tb_intf(tb_intf));
                        
-BURST_CONF #(.tCCD(4), 
-             .tCAS_W(10),
-             .tCAS_R(13),
-             .W_PRE(1'b1),
-             .R_PRE(1'b1),
-             .BURST_LENGTH(2'b00),
-             .AL_DLY(2'b00)) burst_conf(.intf(intf),
+BURST_CONF #(.tCCD(tCCD), 
+             .tCAS_W(tCAS_W),
+             .tCAS_R(tCAS_R),
+             .W_PRE(W_PRE),
+             .R_PRE(R_PRE),
+             .BURST_LENGTH(BURST_LENGTH),
+             .AL_DLY(AL_DLY)) burst_conf(.intf(intf),
                                     .ctrl_intf(ctrl_intf));
                                     
-ASSERTION_CHECK assertion_check #(.tCCD(4), 
-                                  .tCAS_W(10),
-                                  .tCAS_R(13),
-                                  .W_PRE(1'b1),
-                                  .R_PRE(1'b1),
-                                  .BURST_LENGTH(2'b00),
-                                  .AL_DLY(2'b00))(.intf(intf));                                   
+ASSERTION_CHECK  #(.tCCD(4), 
+                   .tCAS_W(10),
+                   .tCAS_R(13),
+                   .W_PRE(1'b1),
+                   .R_PRE(1'b1),
+                   .BURST_LENGTH(2'b00),
+                   .AL_DLY(2'b00))assertion_check(.intf(intf));                                   
 
 endmodule

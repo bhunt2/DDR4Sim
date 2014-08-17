@@ -6,9 +6,10 @@
 //
 // DATE CREATED: 08/03/2014
 //
-// DESCRIPTION:  The module implements fsm to control between initialization,
+// DESCRIPTION:  The module implements FSM to control between initialization,
 //               read/write, refresh, and update.
 // 
+// Note: use clock_t as main clock
 ///////////////////////////////////////////////////////////////////////////////                       
 
 `include "ddr_package.pkg"
@@ -131,7 +132,7 @@ end
           end
        else begin
           refresh_counter <= refresh_counter + 1;
-          if (refresh_counter == tREF - 50) 
+          if (refresh_counter == tREF - 100) 
              refresh_almost <= 1'b1;
           else if (refresh_counter == (tREF -1)) begin
              refresh_almost <= 1'b0;

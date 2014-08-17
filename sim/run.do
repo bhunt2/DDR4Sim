@@ -14,7 +14,7 @@ vlog -work work -sv ../src/tb_interface.sv
 vlog -work work -sv ../src/memory_check.sv
 vlog -work work -sv ../src/ddr_clock.sv
 vlog -work work -sv ../src/Rand_Stimulus.sv
-vlog -work work -sv ../src/jn_assertion.sv
+vlog -work work -sv ../src/assertion_check.sv
 vlog -work work -sv ../src/test.sv
 vsim -voptargs=+acc work.top
 do wave.do

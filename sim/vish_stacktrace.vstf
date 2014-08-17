@@ -1,0 +1,16 @@
+# Current time Sun Aug 17 13:25:56 2014
+# QuestaSim Stack Trace
+# Program = vish
+# Id = "10.3b"
+# Version = "2014.05"
+# Date = "May 30 2014"
+# Platform = win64
+
+Exception c0000005 has occurred at address 07ce946f. Traceback:
+# 0    0x07ce946f: '<unknown (@0x7ce946f)>'
+# 1    0x07d0285f: '<unknown (@0x7d0285f)>'
+# 2    0xa5010402: '<unknown (@0xa5010402)>'
+# 3    0x056fe390: '<unknown (@0x56fe390)>'
+StackWalk failed 487
+# End of Stack Trace
+

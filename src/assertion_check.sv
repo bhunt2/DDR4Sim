@@ -13,6 +13,8 @@
 // tRCD (Act to Cas latency), tZQ (init to Act), tREF (Refresh Period),
 // tRAS (Act to Precharge), tRP (PreCharge to Act).
 // 
+// Note: use clock_t as main clock
+//
 ///////////////////////////////////////////////////////////////////////////////
 
 `include "ddr_package.pkg"
@@ -122,7 +124,7 @@ endsequence
 
 property CL_P;
    @(posedge intf.clock_t)
-   CAS_RD_S |=> (##[(tCAS_R + AL_DELAY): $]DSQ_S);
+   CAS_RD_S |=> (##[(tCAS_R + AL_DLY): $]DSQ_S);
 endproperty
 assert property(CL_P);
 
@@ -131,7 +133,7 @@ assert property(CL_P);
 
 property CWL_P;
    @(posedge intf.clock_t)
-   CAS_WR_S |=> (##[(tCAS_W + AL_DELAY): $]DSQ_S);
+   CAS_WR_S |=> (##[(tCAS_W + AL_DLY): $]DSQ_S);
 endproperty
 assert property(CWL_P);
 

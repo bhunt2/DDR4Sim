@@ -6,28 +6,31 @@
 //
 // DATE CREATED: 07/29/2014
 //
-// DESCRIPTION:  The module implements fsm to control sequence for burst read 
-// and write.  A queue is used to keep track clock cycles delay for each RW
-// command while waiting for the previous transaction complete. Note in 
-// this module, only tracking latency between CAS to Data.
-// From the previous completed to the next data, only waits for 
-// CW or CWL minus # cycle stored in queue.
+// DESCRIPTION:  The module implements FSM to control write and read timing.  
+// The FSM controls the CL and CWL, which are latency between CAS and read,and
+// write data, respectively.
+// The queues are provided to keep track when CAS occurs while the FSM executing
+// the past CAS command. Each time, a CAS pops out of the queue, each CAS in 
+// the queue is updated for # cycles has been waited.
 //
+// Note: use clock_t as main clock
 ///////////////////////////////////////////////////////////////////////////////                       
                   
 `include "ddr_package.pkg"
 
-//note: use clock_t as main clock
 module BURST_RW (DDR_INTERFACE intf,
                  CTRL_INTERFACE ctrl_intf);
 
 int   DELAY;  
    
 rw_fsm_type rw_state, rw_next_state;
+
 logic next_rw;  
 logic clear_rw_counter = 1'b0; 
 int rw_counter,rw_delay;
-int rw_cmd_trk[$];  //tracking number of cycles each rw command waiting
+
+//tracking the CAS command occurs
+int rw_cmd_trk[$];  
 logic [1:0] rw_trk[$];
    
 int temp;   
@@ -72,11 +75,11 @@ begin
             ctrl_intf.data_idle <= 1'b0;
             clear_rw_counter <= 1'b0;
             if (rw_counter == rw_delay) begin
-                rw_next_state    <= RW_DATA;
-                clear_rw_counter <= 1'b1;
-                ctrl_intf.rw_rdy <= 1'b1;
+               rw_next_state    <= RW_DATA;
+               clear_rw_counter <= 1'b1;
+               ctrl_intf.rw_rdy <= 1'b1;
             end else
-                rw_next_state    <= RW_WAIT_STATE;       
+               rw_next_state    <= RW_WAIT_STATE;       
          end
                
          RW_DATA: begin
@@ -96,17 +99,15 @@ begin
 end  
 
 // keep track when CAS occurs 
-always @(intf.reset_n, ctrl_intf.cas_rdy, next_rw)//, rw_state)
+always @(intf.reset_n, ctrl_intf.cas_rdy, next_rw)
 begin
-//   int temp;
+   int temp;
    if (!intf.reset_n) begin
       rw_cmd_trk.delete();    //delete the queues
       rw_delay  = 0;
    end
       
-   //calculate # cycles each RW command waited in queue
-//   if(((rw_state == RW_IDLE) || (rw_state == RW_DATA)) && 
-//       (ctrl_intf.cas_rdy))begin
+   //calculate # cycles each CAS command waited in queue
    if((rw_state == RW_IDLE)  && 
       (ctrl_intf.cas_rdy))begin       
       if (ctrl_intf.act_rw == READ)
@@ -115,29 +116,23 @@ begin
          DELAY = ctrl_intf.WR_DELAY;   
       rw_delay = DELAY - 1;
    end   
-   else if ((rw_state == RW_DATA) && (next_rw)) begin
-           
-           
-           if (rw_trk.pop_front === READ)
-              DELAY = ctrl_intf.RD_DELAY;
-           else
-              DELAY = ctrl_intf.WR_DELAY;   
-          // temp = rw_cmd_trk.pop_front;         
-          //if (DELAY > (temp + 1))    
-           temp = DELAY - rw_cmd_trk.pop_front -1;
-           if (temp > DELAY)
-                rw_delay = temp;
-            else
-                rw_delay = DELAY + ctrl_intf.BL/2;         // enough for the preamble 
+   else if ((rw_state == RW_DATA) && (next_rw)) begin          
+      if (rw_trk.pop_front === READ)
+          DELAY = ctrl_intf.RD_DELAY;
+      else
+          DELAY = ctrl_intf.WR_DELAY;   
       
-           //update # cycles each RW cmd waited
-           foreach (rw_cmd_trk[i]) 
-              rw_cmd_trk [i] = {(rw_cmd_trk[i] + rw_delay +1 )};
+      temp = DELAY - rw_cmd_trk.pop_front -1;
+      if (temp > DELAY)
+         rw_delay = temp;
+      else
+         rw_delay = DELAY + ctrl_intf.BL/2;    // enough for the preamble 
+      
+      //update # cycles each RW cmd waited
+      foreach (rw_cmd_trk[i]) 
+          rw_cmd_trk [i] = {(rw_cmd_trk[i] + rw_delay +1 )};
    end
    
-//   if ((ctrl_intf.cas_rdy) &&
-//        ((rw_state != RW_IDLE) &&
-//        ((rw_state != RW_DATA) && (rw_next_state != RW_IDLE)))) begin
    if ((ctrl_intf.cas_rdy) &&
        (rw_state != RW_IDLE))
       begin

@@ -47,7 +47,7 @@ add wave -noupdate /top/dimm/wr_end
 add wave -noupdate /top/dimm/rd_start
 add wave -noupdate /top/mem_chk/rd_end_d
 add wave -noupdate -expand -subitemconfig {/top/ddr_top/burst_data/cas_in.addr -expand} /top/ddr_top/burst_data/cas_in
-add wave -noupdate -expand -subitemconfig {/top/ddr_top/burst_data/cmd_out.cmd_data -expand /top/ddr_top/burst_data/cmd_out.cmd_data.addr -expand} /top/ddr_top/burst_data/cmd_out
+add wave -noupdate -expand -subitemconfig {/top/ddr_top/burst_data/cmd_out.cmd_data -expand} /top/ddr_top/burst_data/cmd_out
 add wave -noupdate /top/ddr_top/burst_data/rw_in
 add wave -noupdate /top/ddr_top/ctrl_intf/mem_addr
 add wave -noupdate /top/ddr_top/ctrl_intf/pre_reg
@@ -83,9 +83,12 @@ add wave -noupdate /top/ddr_top/ctrl_intf/mode_reg
 add wave -noupdate /top/ddr_top/burst_cas/request
 add wave -noupdate /top/ddr_top/burst_cas/prev_rq
 add wave -noupdate /top/ddr_top/burst_cas/size_queue
+add wave -noupdate /top/ddr_top/ddr_controller/ctrl_state
+add wave -noupdate /top/ddr_top/tb_intf/mrs_update
+add wave -noupdate /top/ddr_top/ddr_controller/refresh_almost
 TreeUpdate [SetDefaultTree]
-WaveRestoreCursors {{Cursor 1} {465418 ps} 0} {{Cursor 2} {367868 ps} 0}
-quietly wave cursor active 2
+WaveRestoreCursors {{Cursor 1} {429320 ps} 0} {{Cursor 2} {367868 ps} 0}
+quietly wave cursor active 1
 configure wave -namecolwidth 240
 configure wave -valuecolwidth 100
 configure wave -justifyvalue left
@@ -100,4 +103,4 @@ configure wave -griddelta 40
 configure wave -timeline 0
 configure wave -timelineunits ms
 update
-WaveRestoreZoom {367678 ps} {368470 ps}
+WaveRestoreZoom {423556 ps} {431748 ps}

@@ -6,9 +6,14 @@
 //
 // DATE CREATED: 08/07/2014
 //
-// DESCRIPTION:  The module implements DIMM that samples the ACT, CAS commands
-// to decode the address and perform write/read to associate array. 
-// 
+// DESCRIPTION:  The module implements DIMM model. The model samples 
+// the pin signals to capture ACT, CAS, and Write Data.  The data is writen to
+// an associate array indexed by addr in ACT and CAS command.  The module also 
+// performs read from the array when capture read command from the commands. It
+// calls the methods set_strobe_pins() and set_rdata_pins() to send the read value
+// to DQS and DQ pins.
+//
+// Note: use clock_t as main clock
 /////////////////////////////////////////////////////////////////////////////// 
 
 `include "ddr_package.pkg"
@@ -46,16 +51,6 @@ bit bg_addr_d, ba_addr_d, we_n_a14_d, addr13_d, bc_n_a12_d, addr11_d, ap_a10_d;
 bit act_d, wr_d, rd_d;
 bit [9:0] addr9_0_d;
 rw_data_type data_out;
-int read_count = 0;
-int write_count = 0;
-int file;
-initial 
-begin
-
-  file = $fopen("../sim/record.txt","w");
-  if(file===0)
-   	$display("Error: Can not open the file."); 
-end
 
 always_ff @ (posedge intf.clock_t)
 begin
@@ -111,7 +106,7 @@ end
 assign wr_end = (((cycle_8[4]) && (!cycle_8_d)) ||
                 ((cycle_4[2]) && (!cycle_4_d)))? 1'b1:1'b0;
 
-//create one clock cylce of rd_start               
+//create one clock cycle of rd_start               
 always_ff @(posedge intf.clock_t)
 begin
     rd_start <= ((tb_intf.dev_rd) && (tb_intf.dev_rw == READ));                
@@ -136,7 +131,8 @@ begin
    if (act)
       act_addr_store = {act_addr_store, act_addr};   
    else if (tb_intf.no_act_rdy) begin
-      temp_addr      = {tb_intf.act_addr.bg_addr,tb_intf.act_addr.ba_addr,tb_intf.act_addr.row_addr};
+      temp_addr      = {tb_intf.act_addr.bg_addr,tb_intf.act_addr.ba_addr,
+                        tb_intf.act_addr.row_addr};
       act_addr_store = {act_addr_store, temp_addr}; 
    end  
    end      
@@ -156,9 +152,6 @@ begin
    else begin    
    if ((rd) || (wr))
       cas_addr_store = {cas_addr_store, cas_addr};
-//   if ((wr_end || rd_start) &&
-//       (act_addr_store.size != 0))      
-//      col_addr <= cas_addr_store.pop_front;
    end   
 end
 
@@ -175,8 +168,7 @@ end
 always_ff @(posedge intf.dqs_t)
 begin
    if(tb_intf.dev_rw == WRITE) 
-      data_t <= {intf.dq, data_t[4:1]};
-      
+      data_t <= {intf.dq, data_t[4:1]};      
 end
 
 //capture data on the dqsc_c. Note ignore the first rising edge for pre_amble 
@@ -193,13 +185,10 @@ end
 
 //write data into associate array
 always @ (wr_end_d, rd_start_d, intf.reset_n)
-
 begin
    bit [29:0] dimm_index;
 
    if (!intf.reset_n) begin
-      read_count = 0;
-      write_count = 0;
       dimm_index  = 0;
    end;   
    
@@ -207,37 +196,22 @@ begin
    if ((wr_end_d) && (tb_intf.BL == 8))begin
       dimm[{row_addr,col_addr}] = {data_c[4], data_t[3], data_c[3], data_t[2], 
                                    data_c[2], data_t[1], data_c[1], data_t[0]};
-      $fwrite(file, "%t  row_Addr: 0x%h col_Addr: 0x%h Wr_Data: 0x%h   \n", 
-                  $stime, row_addr, col_addr ,{data_c[4], data_t[3], data_c[3], data_t[2], 
-                                      data_c[2], data_t[1], data_c[1], data_t[0]});
-       end                               
+   end                               
    else if (wr_end_d) begin
-//      $display ("Dimm index write %0x", dimm_index);
-        write_count ++;
-        dimm[{row_addr,col_addr}] = {data_c[4],data_t[3],data_c[3],data_t[2]} ;   
-      $fwrite(file, "%t  row_Addr: 0x%h col_Addr: %0h  Wr_Data: 0x%h   \n", 
-                  $stime, row_addr, col_addr ,{data_c[4], data_t[3], data_c[3], data_t[2]});
-
+      dimm[{row_addr,col_addr}] = {data_c[4],data_t[3],data_c[3],data_t[2]} ;   
    end
       
    if ((rd_start_d) && (tb_intf.BL == 8)) begin
-//      $display ("Dimm index read %0x", dimm_index);
       data_out.data_wr = dimm[{row_addr,col_addr}];
       data_out.rw      = READ;
       data_out.burst_length = tb_intf.BL;
       data_out.preamble = tb_intf.RD_PRE;
-      $fwrite(file, "%t  row_Addr: 0x%h col_Addr: %0h  Rd_Data: 0x%h   \n", 
-                  $stime, row_addr, col_addr ,data_out.data_wr);
    end   
    else if (rd_start_d) begin
-//      $display ("Dimm index read %0x", dimm_index);
-      read_count ++;
       data_out.data_wr[31:0] = dimm[dimm_index];//dimm[{row_addr,col_addr}];  
       data_out.rw            = READ;
       data_out.burst_length  = tb_intf.BL;
       data_out.preamble = tb_intf.RD_PRE;
-      $fwrite(file, "%t  row_Addr: 0x%h col_Addr: %0h  Rd_Data: 0x%h   \n", 
-                  $stime, row_addr, col_addr ,data_out.data_wr);
    end
 end
 

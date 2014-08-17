@@ -6,13 +6,20 @@
 //
 // DATE CREATED: 07/30/2014
 //
-// DESCRIPTION:  The module implements fsm  for CAS command.
-// The FSM is to control the tRRD, delay between ACT and CAS. The delay between     
-// CAS to CAS is ignored because delay ACT -> ACT is greater than CAS -CAS delay 
-// In case of read to write, or write to read, 
-// the burst_cas will wait for previous cmd completed and add tWTR 
-// OR CWL wait cycles. The function extra_wait() will calculate the cycles 
-// accordingly.
+// DESCRIPTION:  The module implements FSM  for CAS command.
+// The FSM to control tRCD, latency ACT and CAS, and tCCD, Cas to Cas latency. 
+// Note: additional delay tWTR or (BL/2 + 4) for write to read OR
+// Read to Write.
+// The function extra_wait() will calculate these delay cycles.
+// The queues are provided to tracking when ACT occurs while the FSM process the
+// past ACT commands. Anytime an ACT command pops out of the queues, each cmd in 
+// queue is updated for number of clock cycle it has been waited. The number of
+// wait cycles will check with tRCD, if satisfied than wait for tCCD else  
+// wait for tRCD - number waited clock. 
+// If ACT occurs in state IDLE or CMD state, it not need to tracking because the 
+// current ACT completed, and the next ACT will wait for tCCD.
+// Note: use clock_t as main clock
+//
 ///////////////////////////////////////////////////////////////////////////////                       
                   
 `include "ddr_package.pkg"
@@ -26,13 +33,15 @@ logic next_cas = 1'b0;
 logic clear_cas_counter = 1'b0;
 int  cas_delay, cas_counter, extra_count =0;
 logic rtw =1'b0;
-int act_cmd_trk[$];        //tracking number of cycles each act command waited
-logic [1:0] act_rw_trk[$]; //track read or write command
 logic[1:0] request, prev_rq ;
 logic ignore = 1'b0;
 
-int temp;
-int size_queue;
+//queues to tracking each ACT command waited
+int act_cmd_trk[$];        
+logic [1:0] act_rw_trk[$]; 
+
+
+
    
 //fsm control timing between CAS and act
 always_ff @(posedge intf.clock_t, negedge intf.reset_n)
@@ -64,8 +73,10 @@ begin
            ctrl_intf.cas_rdy   <= 1'b0;
            ctrl_intf.cas_idle  <= 1'b1;
            clear_cas_counter   <= 1'b1;   
+           
            if (ctrl_intf.pre_rdy)
               ignore <= 1'b0;
+           
            if ((ctrl_intf.act_rdy ) || 
                (ctrl_intf.no_act_rdy)) begin
                
@@ -96,8 +107,7 @@ begin
                 prev_rq           <= request;
              end 
                 
-             else begin             // read to write OR write to read
-                
+             else begin             // read to write OR write to read     
                 extra_wait(.prev_rq(prev_rq),
                            .request(request),
                            .rtw(rtw),
@@ -151,7 +161,7 @@ end
 //tracking on ACT command to calulate cas_delay and r/w request
 always @ (intf.reset_n, ctrl_intf.act_rdy, ctrl_intf.no_act_rdy, next_cas)
 begin
-
+   int temp;
    if (!intf.reset_n) begin
       act_cmd_trk.delete();
       act_rw_trk.delete();
@@ -161,6 +171,7 @@ begin
    
    //set to the tRCD if ACT_CMD occur in state IDLE or CAS_CMD
    //tRCD : ACT to CAS latency
+   
    if (((cas_state == CAS_IDLE) || (cas_state == CAS_CMD)) && 
        ((ctrl_intf.act_rdy)     || (ctrl_intf.no_act_rdy))) begin
         
@@ -170,9 +181,10 @@ begin
 
    //pop out the next cmd in queue
    else if ((cas_state == CAS_CMD) && (next_cas)) begin
+   
       //tRCD - # cycles that ACT cmd waited
       temp = (tRCD - act_cmd_trk.pop_front - 1);
-      size_queue  = act_cmd_trk.size;
+   
       //ensure tCCD (CAS - CAS delay) constraint
       if (temp > ctrl_intf.tCCD)
          cas_delay = temp;
@@ -188,6 +200,7 @@ begin
    end
 end
 
+//tracking when ACT command occurs
 always @(ctrl_intf.act_rdy, ctrl_intf.no_act_rdy)
 begin   
    //recorded ACT cmd in queue while executing the previous cmd
@@ -196,7 +209,6 @@ begin
 
       act_cmd_trk = {act_cmd_trk, (cas_delay - cas_counter )}; 
       act_rw_trk  = {act_rw_trk, ctrl_intf.act_rw};    
-     // size_queue  = act_cmd_trk.size;
    end       
 end         
 

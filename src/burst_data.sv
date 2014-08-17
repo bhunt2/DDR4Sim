@@ -6,9 +6,21 @@
 //
 // DATE CREATED: 08/01/2014
 //
-// DESCRIPTION:  The module is simple of data pipiline for each stage request
-// using queues and get method to translate to pin levels
+// DESCRIPTION:  The module is data central to setup the addr/data/command for
+// set_cmd_pins() method, which is to translate these commands to pin-level 
+// signals, and set_strobe_pins() and set_wdata_pin(), which are a pair of 
+// methods to setup the DQS and DQ pin for write data.
+//
+// The module captures the stimulus input and queues in two separate queues, one
+// for Cas command and Write data as well as data initialized in MRS registers
+// PreCharge, Refresh. When the commands ready, the data/addr/command are 
+// assigned to user typedef command_type or rw_data_type for executing the methods
 // 
+// The memory_map() is to translate physical addr to topological address.
+// Capture the data in MRS register for some of timing parameters.
+//
+// Note: use clock_t as main clock
+//
 ///////////////////////////////////////////////////////////////////////////////
 
 `include "ddr_package.pkg"
@@ -87,7 +99,10 @@ begin
     rw_out_temp = rw_queue.pop_front;
 end 
        
-//
+//the procedure block is to setup the data/addr/commands into a
+//type define variables for set_cmd_pins() method when individual command 
+//ready.
+
 always @  (ctrl_intf.act_rdy, ctrl_intf.no_act_rdy,
            ctrl_intf.cas_rdy,ctrl_intf.rw_rdy,
            ctrl_intf.mrs_rdy, ctrl_intf.rw_rdy, ctrl_intf.pre_rdy, 
@@ -147,7 +162,7 @@ begin
       end   
 end
    
-//decode the timing data set in the MRS registers
+//captures the timing data set in the MRS registers
 
 always @(ctrl_intf.mrs_rdy)
 begin

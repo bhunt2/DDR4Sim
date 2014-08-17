@@ -6,9 +6,13 @@
 //
 // DATE CREATED: 08/07/2014
 //
-// DESCRIPTION:  The module implements memory check.  Storing the write data into
-// associate array used memory addr as index. Capture read data and check against
-// the array. 
+// DESCRIPTION:  The module is to monitor Read/Write transaction between 
+// DDR Controller and Dimm Model via the DDR Interface. The module captures
+// the Read/Write request from stimulus and stored the write data using
+// a associate array with addr as index. The read data is captured from DQS and
+// DQ bus and checked agains the stored write data.  The result will be logged 
+// into a text file
+// Note: use clock_t as main clock
 // 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -18,12 +22,14 @@ module MEMORY_CHECK (DDR_INTERFACE intf,
                      TB_INTERFACE tb_intf);
 
 
+//associate array to store the write data, using the address as index
 data_type       write_mem [dimm_addr_type];
+
 logic [4:0][7:0] data_c,data_t;
 dimm_addr_type  rd_addr_stored[$];
 dimm_addr_type  raddr;
 dimm_addr_type raddr_prev = '1;
-bit             rd_end, rd_end_d;
+bit  rd_end, rd_end_d;
 bit [4:0]cycle_8 = 5'b10000;
 bit [2:0]cycle_4 = 5'b100;
 bit cycle_8_d    = 1'b1;
@@ -37,14 +43,16 @@ int file;
 assign rd_end = (((cycle_8[4]) && (!cycle_8_d)) ||
                 ((cycle_4[2]) && (!cycle_4_d)))? 1'b1:1'b0;
 
+//open the log file to records test output
 initial 
 begin
-
   file = $fopen("../sim/output.txt","w");
   if(file===0)
    	$display("Error: Can not open the file."); 
 end
 
+//store the write data in the associate arrays, mem addr as index
+//track the read address
 always @ (act_cmd_d, intf.reset_n)
 begin
     bit [28:0] index;
@@ -72,7 +80,6 @@ begin
   
    string RESULT;
    if (rd_end_d) begin
-     //if (raddr_prev != raddr) begin
         data_wr = write_mem[raddr];     
         if (tb_intf.BL == 8) begin
            data_rd = {data_t[4], data_c[4], data_t[3], data_c[3], 
@@ -95,8 +102,6 @@ begin
                    $stime, raddr,  data_wr[31:0], data_rd[31:0], RESULT);           
             data_check_4: assert (data_wr[31:0] == data_rd);
        end   
-     //  raddr_prev = raddr;
-     //end  
    end 
 end
     

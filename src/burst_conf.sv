@@ -9,6 +9,8 @@
 // DESCRIPTION:  The module implements fsm to control sequence for DDR4 
 //  Initialization
 //  Refer data sheet for details
+//
+// Note: use clock_t as main clock
 // 
 ///////////////////////////////////////////////////////////////////////////////                       
 

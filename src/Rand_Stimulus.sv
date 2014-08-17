@@ -1,7 +1,24 @@
-// This module randomly generates data, address, and operation fields for testing a DDR4 simulation.
-// It stores these in a structure that contains a 64 bit data segement, an 32 bit 
-// address segement, and 2 bit op code segement that specifies a read or write operation.
+///////////////////////////////////////////////////////////////////////////////
+//
+// FILE NAME: Rand_Stimulus.sv
+//
+// AUTHOR: Jeff Nguyen and Jon Vlas
+//
+// DATE CREATED: 08/07/2014
+//
+// DESCRIPTION:  
+// This module randomly generates data, address, and operation fields for 
+// testing a DDR4 simulation. It stores these in a structure that contains a 
+// 64 bit data segement, an 32 bit address segement, and 2 bit op code segement 
+// that specifies a read or write operation.
 // It then puts these values in a queue to be called by the testbench. 
+// Addition contrains for read the same addresses with write and weight distribution
+// The DDR Controller controls the stimulus inputs.
+//
+// Note: use clock_t as main clock
+// 
+///////////////////////////////////////////////////////////////////////////////
+
 
 `include "ddr_package.pkg"
 module Rand_Stimulus( DDR_INTERFACE intf,
@@ -11,6 +28,7 @@ module Rand_Stimulus( DDR_INTERFACE intf,
 parameter num_op = 500;
 int read_count = 0;
 int write_count = 0;
+
 // Use class for randomization
 class Packet;
 // Random variables

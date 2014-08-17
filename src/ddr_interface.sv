@@ -9,8 +9,9 @@
 //
 // DESCRIPTION:  The module defines all signals connect DDR Controller and DDR
 // memory and used as a module port.  The module also includes the method of
-//  * translating signal level for device commmands
-//  * assertion test for function protocol.
+//  * translate commands to pin level signals
+//  * set strobe signal DQS pins
+//  * set read/write data on DQ PINS
 //
 ///////////////////////////////////////////////////////////////////////////////                       
                   
@@ -174,7 +175,8 @@ begin
       ap_a10    <= 1'b0;
       addr9_0   <= command.cmd_data.addr.col_addr [9:0];
    end
-         //MRS      
+   
+   //MRS      
    MRS: begin
       cs_n      <= 1'b0;
       act_n     <= 1'b1;
@@ -262,8 +264,6 @@ begin
 end
 endtask
          
-
-
 endinterface
 
 
