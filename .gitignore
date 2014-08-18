@@ -1,0 +1,6 @@
+sim/work/
+sim/DDR4.*
+sim/vsim.wlf
+sim/modelsim.*
+sim/output.txt
+sim/wlf*

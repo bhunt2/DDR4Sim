@@ -6,7 +6,7 @@
 
 `include "ddr_package.pkg"
 module Stimulus(CTRL_INTERFACE ctrl_intf,
-                input logic dev_busy,
+                input logic dev_busy, next_cmd,
                 output input_data_type data,
                 output logic act_cmd);
 
@@ -45,7 +45,7 @@ end
 		
 	end
 //$display("Contents: %p",su);
-wait (ctrl_intf.rw_proc);
+wait (!dev_busy);
 do
    @ (posedge act_cmd ) begin
       data = su.pop_back;
@@ -56,7 +56,7 @@ end
 
 always_ff @ (intf.clock_t)
 begin
-    if ((!dev_busy) && (su.size >0 ) && (ctrl_intf.act_idle))
+    if ((su.size >0 ) && (next_cmd))
        act_cmd <= 1'b1;
     else   
        act_cmd <= 1'b0;

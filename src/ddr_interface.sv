@@ -9,32 +9,35 @@
 //
 // DESCRIPTION:  The module defines all signals connect DDR Controller and DDR
 // memory and used as a module port.  The module also includes the method of
-//  * translating signal level for device commmands
-//  * assertion test for function protocol.
+//  * translate commands to pin level signals
+//  * set strobe signal DQS pins
+//  * set read/write data on DQ PINS
 //
 ///////////////////////////////////////////////////////////////////////////////                       
                   
 
 `include "ddr_package.pkg"
+//`include "Assertions.pkg"
 interface DDR_INTERFACE;
 timeunit 10ps;
 timeprecision 1ps;
 
 
 logic clock_n, clock_t;
-logic clock_w,clock_r;   //create data strobe signals
+logic clock_r;   //create data strobe signals
 logic reset_n;
    
 logic cke, cs_n,act_n;
 logic ras_n_a16, cas_n_a15, we_n_a14;
-logic bc_n_a12, ap_a10;
-logic addr17;
-logic addr13;
-logic addr11;
-logic [9:0] addr9_0;
 logic [BG_WIDTH - 1:0] bg_addr;
 logic [BA_WIDTH - 1:0] ba_addr;
 logic [2:0] C2_0 = CHIP_ID;
+logic bc_n_a12;
+logic addr17;
+logic addr13;
+logic addr11;
+logic ap_a10;
+logic [9:0] addr9_0;
 
 logic [DATA_WIDTH-1:0] dq;
 logic dqs_t = 1'b1;
@@ -47,8 +50,8 @@ wire ODT;
                    
 
 // Assertions
-import checkerLibrary::*;
-check_reset(posedge clock_t, reset_n, cke);	
+
+//check_reset(posedge clock_t, reset_n, cke);	
 			
 // method for strobe pins
 task set_strobe_pins (input rw_data_type data);
@@ -172,7 +175,8 @@ begin
       ap_a10    <= 1'b0;
       addr9_0   <= command.cmd_data.addr.col_addr [9:0];
    end
-         //MRS      
+   
+   //MRS      
    MRS: begin
       cs_n      <= 1'b0;
       act_n     <= 1'b1;
@@ -260,8 +264,6 @@ begin
 end
 endtask
          
-
-
 endinterface
 
 
