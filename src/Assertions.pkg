@@ -161,4 +161,4 @@ endchecker
 //   This was ignored in our implementation
 
 
-endmodule
+endpackage
